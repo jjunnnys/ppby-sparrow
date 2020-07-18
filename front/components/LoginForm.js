@@ -7,7 +7,11 @@ const ButtonWrapper = styled.div`
   margin-top: 10px;
 `;
 
-const LoginForm = () => {
+const FormWrapper = styled(Form)`
+  padding: 10px;
+`;
+
+const LoginForm = ({ setIsLoggedIn }) => {
   // 나중에는 form 관련 리액트 라이브러리 사용해 보기
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +25,15 @@ const LoginForm = () => {
     setPassword(e.target.value);
   }, []);
 
+  const onSubmitForm = useCallback(() => {
+    // e.prevmentDefalut() 가 이미 onFinish에 적용되어 있다. (antd 기능)
+    console.log(id, password);
+    setIsLoggedIn(true);
+  }, [id, password]);
+
   return (
-    <Form>
+    // 버튼에서 submit이 되면 onFinish가 호출된다.
+    <FormWrapper onFinish={onSubmitForm}>
       <div>
         <label htmlFor="user-id">아이디</label>
         <br />
@@ -55,7 +66,7 @@ const LoginForm = () => {
           </a>
         </Link>
       </ButtonWrapper>
-    </Form>
+    </FormWrapper>
   );
 };
 

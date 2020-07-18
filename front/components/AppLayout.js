@@ -13,7 +13,7 @@ const SearchInput = styled(Input.Search)`
 
 // 레이아웃은 여러개 만들 수 있음 (특정 컴포넌트의 공통사항)
 const AppLayout = ({ children }) => {
-  const [isLogedIn, setIsLogedIn] = useState(false); // 백엔드 서버가 없어 연습 용 더미 데이터 만듬
+  const [isLogedIn, setIsLoggedIn] = useState(false); // 백엔드 서버가 없어 연습 용 더미 데이터 만듬
 
   return (
     <div>
@@ -46,7 +46,11 @@ const AppLayout = ({ children }) => {
       >
         {/* xs: 모바일, sm: 태블릿, md: 작은 데스크탑  -> n/24라고 생각, 한 Row의 합은 24가 되어야 함 */}
         <Col xs={24} md={6}>
-          {isLogedIn ? <UserProfile /> : <LoginForm />}
+          {isLogedIn ? (
+            <UserProfile setIsLoggedIn={setIsLoggedIn} />
+          ) : (
+            <LoginForm setIsLoggedIn={setIsLoggedIn} />
+          )}
         </Col>
         <Col xs={24} md={12}>
           {children}
