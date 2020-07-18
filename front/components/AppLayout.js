@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link'; // react의 router의 기능
-import { Menu } from 'antd';
+import { Menu, Input, Row, Col } from 'antd';
 
 // 레이아웃은 여러개 만들 수 있음 (특정 컴포넌트의 공통사항)
 const AppLayout = ({ children }) => {
@@ -19,12 +19,34 @@ const AppLayout = ({ children }) => {
           </Link>
         </Menu.Item>
         <Menu.Item>
+          <Input.Search enterButton style={{ verticalAlign: 'middle' }} />
+        </Menu.Item>
+        <Menu.Item>
           <Link href="/signup">
             <a>회원가입</a>
           </Link>
         </Menu.Item>
       </Menu>
-      {children}
+      <Row
+        gutter={8} // 컬럼 사이에 간격 주기(두 컬럼 사이를 8px로 띄움)
+      >
+        {/* xs: 모바일, sm: 태블릿, md: 작은 데스크탑  -> n/24라고 생각, 한 Row의 합은 24가 되어야 함 */}
+        <Col xs={24} md={6}>
+          왼쪽 메뉴
+        </Col>
+        <Col xs={24} md={12}>
+          {children}
+        </Col>
+        <Col xs={24} md={6}>
+          <a
+            href="https://velog.io/@ppby"
+            target="_blank" // _blank을 쓰면 보안 위험이 있어
+            rel="noreFerrer noopener" // <- 이 걸 작성
+          >
+            ppby 블로그
+          </a>
+        </Col>
+      </Row>
     </div>
   );
 };
