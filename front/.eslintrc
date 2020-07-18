@@ -1,0 +1,21 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2020, // ECMA 버전
+    "sourceType": "module", // 모듈로하면 import export 기능
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true // 최신 문법
+  },
+  "extends": [
+    // 남들이 만든 규칙을 따른다.
+    "eslint: recommend",
+    "plugin:react/recommended"
+  ],
+  "plugins": ["import", "react-hooks"],
+  "rules": {}
+}
