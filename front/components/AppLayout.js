@@ -4,6 +4,12 @@ import Link from 'next/link'; // react의 router의 기능
 import { Menu, Input, Row, Col } from 'antd';
 import UserProfile from './UserProfile';
 import LoginForm from './LoginForm';
+import styled from 'styled-components';
+
+// 컴포넌트 자체를 스타일링 하는 거면 이렇게 표현
+const SearchInput = styled(Input.Search)`
+  vertical-align: middle;
+`;
 
 // 레이아웃은 여러개 만들 수 있음 (특정 컴포넌트의 공통사항)
 const AppLayout = ({ children }) => {
@@ -23,7 +29,11 @@ const AppLayout = ({ children }) => {
           </Link>
         </Menu.Item>
         <Menu.Item>
-          <Input.Search enterButton style={{ verticalAlign: 'middle' }} />
+          <SearchInput
+            enterButton
+            // style={{ verticalAlign: 'middle' }} -> 인라인 스타일은 리렌더링 최적화가 안된다.
+            // 이런 식으로 객체를 넣어주면 안된다. ( {} === {} -> false가 뜸, 즉 virtual DOM이 검사하면서 값이 바꼈으니 리렌더링을 시킴)
+          />
         </Menu.Item>
         <Menu.Item>
           <Link href="/signup">
