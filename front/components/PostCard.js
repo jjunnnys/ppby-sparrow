@@ -6,7 +6,7 @@
 import React, { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Card, Popover, Button, Avatar } from 'antd';
+import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import {
   RetweetOutlined,
   HeartOutlined,
@@ -15,6 +15,7 @@ import {
   EllipsisOutlined,
 } from '@ant-design/icons';
 import PostImages from './PostImages';
+import CommentForm from './CommentForm';
 
 const PostCard = ({ post }) => {
   const [liked, setLiked] = useState(false);
@@ -79,9 +80,26 @@ const PostCard = ({ post }) => {
           description={post.content}
         />
       </Card>
-      {commentFormOpend && <div>댓글 부분</div>}
-      {/* <ConmmentForm />
-        <Comments /> */}
+      {commentFormOpend && (
+        <div>
+          {/* 어떤 게시글에 댓글을 달 것인가에 대한 정보를 넘겨 줌 */}
+          <CommentForm post={post} />
+          <List
+            header={`${post.Comments.length}개의 댓글`}
+            itemLayout="horizontal"
+            dataSource={post.Comments} // Comments 배열의 각각의 인덱스가 item으로 들어감
+            renderItem={(item) => (
+              <li>
+                <Comment
+                  author={item.user.nickname}
+                  avatar={<Avatar>{item.user.nickname[0]}</Avatar>} // 동그라미에 첫번 째 글자만 나옴
+                  content={item.content}
+                />
+              </li>
+            )}
+          />
+        </div>
+      )}
     </div>
   );
 };
