@@ -9,7 +9,7 @@ export const initialSate = {
         nickname: 'ppby',
       },
       content: '첫 번째 게시글 #해시태그 #익스프레스',
-      Image: [
+      Images: [
         {
           src:
             'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F242DFD4752C93C7B20',
