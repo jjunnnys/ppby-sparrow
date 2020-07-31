@@ -1,5 +1,5 @@
 {
-  "parser": "babel-eslint",
+  "parser": "babel-eslint", // 바벨이 코드를 해석함
   "parserOptions": {
     "ecmaVersion": 2020, // ECMA 버전
     "sourceType": "module", // 모듈로하면 import export 기능

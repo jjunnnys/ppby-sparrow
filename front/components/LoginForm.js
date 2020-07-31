@@ -15,15 +15,15 @@ const FormWrapper = styled(Form)`
 `;
 
 const LoginForm = () => {
-  const [id, onChangeId] = useInput('');
+  const [email, onChangeEmail] = useInput(''); // mysql에서 id 값을 자동으로 붙혀주는 거랑 헷갈릴 수 있어서 (email로 바꿈)
   const [password, onChangePassword] = useInput('');
-  const { isLoggingIn } = useSelector((state) => state.user);
+  const { logInDone } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const onSubmitForm = useCallback(() => {
     dispatch(
       loginRequestAction({
-        id,
+        email,
         password,
       })
     );
@@ -33,13 +33,13 @@ const LoginForm = () => {
     // 버튼에서 submit이 되면 onFinish가 호출된다.
     <FormWrapper onFinish={onSubmitForm}>
       <div>
-        <label htmlFor="user-id">아이디</label>
+        <label htmlFor="user-mail">이메일</label>
         <br />
         <Input
           type="email"
-          name="user-id"
-          value={id}
-          onChange={onChangeId}
+          name="user-email"
+          value={email}
+          onChange={onChangeEmail}
           required
         />
       </div>
@@ -55,13 +55,7 @@ const LoginForm = () => {
         />
       </div>
       <ButtonWrapper>
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={
-            isLoggingIn // isLoggingIn 이 true면 버튼이 로딩 중으로 바뀜
-          }
-        >
+        <Button type="primary" htmlType="submit" loading={logInDone}>
           로그인
         </Button>
         <Link href="/signup">

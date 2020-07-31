@@ -7,9 +7,9 @@ import {
   LOG_OUT_FAILURE,
   LOG_IN_REQUEST,
   LOG_OUT_REQUEST,
-  SIGNUP_REQUEST,
-  SIGNUP_SUCCESS,
-  SIGNUP_FAILURE,
+  SIGN_UP_SUCCESS,
+  SIGN_UP_REQUEST,
+  SIGN_UP_FAILURE,
 } from '../reducers/user';
 
 const logInAPI = () => {
@@ -62,12 +62,12 @@ function* signUp() {
     // const result = yield call(signUpAPI)
     yield delay(1000);
     yield put({
-      type: SIGNUP_SUCCESS,
+      type: SIGN_UP_SUCCESS,
       data: null,
     });
   } catch (error) {
     yield put({
-      type: SIGNUP_FAILURE,
+      type: SIGN_UP_FAILURE,
       error: error.response.data,
     });
   }
@@ -82,7 +82,7 @@ function* watchLogOut() {
 }
 
 function* watchSignUp() {
-  yield takeLatest(SIGNUP_REQUEST, signUp);
+  yield takeLatest(SIGN_UP_REQUEST, signUp);
 }
 
 export default function* userSaga() {

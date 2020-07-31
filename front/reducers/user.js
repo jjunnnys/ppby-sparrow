@@ -23,9 +23,9 @@ export const LOG_OUT_REQUEST = 'LOG_OUT_REQUEST';
 export const LOG_OUT_SUCCESS = 'LOG_OUT_SUCCESS';
 export const LOG_OUT_FAILURE = 'LOG_OUT_FAILURE';
 
-export const SIGNUP_REQUEST = 'SIGNUP_REQUEST';
-export const SIGNUP_SUCCESS = 'SIGNUP_SUCCESS';
-export const SIGNUP_FAILURE = 'SIGNUP_FAILURE';
+export const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
+export const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
+export const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
 
 export const FOLLOW_REQUEST = 'FOLLOW_REQUEST';
 export const FOLLOW_SUCCESS = 'FOLLOW_SUCCESS';
@@ -109,20 +109,20 @@ const reducer = (state = initialSate, action) => {
         logOutError: action.error,
       };
     // 회원가입
-    case SIGNUP_REQUEST:
+    case SIGN_UP_REQUEST:
       return {
         ...state,
         signUpLoading: true, 
         signUpDone: false,
         signUpError: null,
       };
-    case SIGNUP_SUCCESS:
+    case SIGN_UP_SUCCESS:
       return {
         ...state,
         signUpLoading: false,
         signUpDone: true,
       };
-    case SIGNUP_FAILURE:
+    case SIGN_UP_FAILURE:
       return {
         ...state,
         signUpLoading: false,
