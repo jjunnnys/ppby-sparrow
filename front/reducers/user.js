@@ -16,6 +16,12 @@ export const initialSate = {
   changeNicknameLoading: false, // 닉네임 변경 시도 중
   changeNicknameDone: false,
   changeNicknameError: null,
+  followLoading: false, // 팔로우 시도 중
+  followDone: false,
+  followError: null,
+  unfollowLoading: false, // 언팔로우 시도 중
+  unfollowDone: false,
+  unfollowError: null,
 };
 
 /* 액션 */
@@ -73,26 +79,45 @@ const dummyUser = (data) => ({
   id: 1,
   /* 시퀄라이즈에서 합쳐준다. 대문자로 */
   Posts: [{ id: 1 }], // 내 가쓴 글
-  Followings: [
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-    { nickname: 'pepperBoy' },
-  ], // 내가 팔로우한 사람
-  Followers: [
-    { nickname: '칠리걸' },
-    { nickname: '칠리걸' },
-    { nickname: '칠리걸' },
-    { nickname: '칠리걸' },
-  ], // 나를 팔로우한 사람
+  Followings: [], // 내가 팔로우한 사람
+  Followers: [], // 나를 팔로우한 사람
 });
 
 const reducer = (state = initialSate, action) => {
   return produce(state, (draft) => {
     switch (action.type) {
+      /* 팔로우 */
+      case FOLLOW_REQUEST:
+        draft.followLoading = true;
+        draft.followDone = false;
+        draft.followError = null;
+        break;
+      case FOLLOW_SUCCESS:
+        draft.userInfo.Followings.push({ id: action.data });
+        draft.followLoading = false;
+        draft.followDone = true;
+        break;
+      case FOLLOW_FAILURE:
+        draft.followLoading = false;
+        draft.followError = action.error;
+        break;
+      /* 언팔로우 */
+      case UNFOLLOW_REQUEST:
+        draft.unfollowLoading = true;
+        draft.unfollowDone = false;
+        draft.unfollowError = null;
+        break;
+      case UNFOLLOW_SUCCESS:
+        draft.userInfo.Followings = draft.userInfo.Followings.filter(
+          (value) => value.id !== action.data
+        );
+        draft.unfollowLoading = false;
+        draft.unfollowDone = true;
+        break;
+      case UNFOLLOW_FAILURE:
+        draft.unfollowLoading = false;
+        draft.unfollowError = action.error;
+        break;
       /* 로그인 */
       case LOG_IN_REQUEST:
         draft.logInLoading = true;
