@@ -42,6 +42,10 @@ export const CHANGE_NICKNAME_REQUEST = 'UNFOLLOW_REQUEST';
 export const CHANGE_NICKNAME_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const CHANGE_NICKNAME_FAILURE = 'UNFOLLOW_FAILURE';
 
+// 리듀셔는 액션을 통해서 상태를 바꿀 수 있기 떄문에 post 관련 액션을 만든다.
+export const ADD_POST_TO_USER_INFO = 'ADD_POST_TO_USER_INFO';
+export const REMOVE_POST_OF_USER_INFO = 'REMOVE_POST_OF_USER_INFO';
+
 /* 액션 생성함수 (saga가 성공과 실패 했을 때 액션을 호출해 주기 때문에 (SUCCESS,FAILURE) 굳이 안 만들어도 된다.) */
 
 export const loginRequestAction = (data) => {
@@ -59,14 +63,16 @@ export const logoutRequestAction = () => {
 
 /* 더미 유저 데이터 함수 만들기 */
 
+// useInfo에 해당
 const dummyUser = (data) => ({
+  // data -> email, password
   ...data,
   nickname: '민준',
   id: 1,
   /* 시퀄라이즈에서 합쳐준다. 대문자로 */
-  Posts: [], // 내 가쓴 글
-  Followings: [], // 내가 팔로우한 사람
-  Followers: [], // 나를 팔로우한 사람
+  Posts: [{ id: 1 }], // 내 가쓴 글
+  Followings: [{ nickname: 'pepperBoy' }], // 내가 팔로우한 사람
+  Followers: [{ nickname: '칠리걸' }], // 나를 팔로우한 사람
 });
 
 const reducer = (state = initialSate, action) => {
@@ -154,6 +160,24 @@ const reducer = (state = initialSate, action) => {
         ...state,
         changeNicknameLoading: false,
         changeNicknameError: action.error,
+      };
+    case ADD_POST_TO_USER_INFO:
+      return {
+        ...state,
+        userInfo: {
+          ...state.userInfo,
+          Posts: [{ id: action.data }, ...state.userInfo.Posts],
+        },
+      };
+    case REMOVE_POST_OF_USER_INFO:
+      return {
+        ...state,
+        userInfo: {
+          ...state.userInfo,
+          Posts: state.userInfo.Posts.filter(
+            (value) => value.id !== action.data
+          ),
+        },
       };
     default:
       return state;
