@@ -1,4 +1,11 @@
-import { all, fork, takeLatest, delay, put } from 'redux-saga/effects';
+import {
+  all,
+  fork,
+  takeLatest,
+  delay,
+  put,
+  throttle,
+} from 'redux-saga/effects';
 import axios from 'axios';
 import shortid from 'shortid';
 import {
@@ -11,11 +18,35 @@ import {
   REMOVE_POST_REQUEST,
   REMOVE_POST_SUCCESS,
   REMOVE_POST_FAILURE,
+  LOAD_POSTS_REQUEST,
+  LOAD_POSTS_SUCCESS,
+  LOAD_POSTS_FAILURE,
+  generateDummyPost,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
   REMOVE_POST_OF_USER_INFO,
 } from '../reducers/user';
+
+const loadPostsAPI = () => {
+  return axios.get('/api/posts');
+};
+
+function* loadPosts(action) {
+  try {
+    // const result = yield call(loadPostsAPI, action.data);
+    yield delay(1000);
+    yield put({
+      type: LOAD_POSTS_SUCCESS,
+      data: generateDummyPost(10),
+    });
+  } catch (error) {
+    yield put({
+      type: LOAD_POSTS_FAILURE,
+      data: error.response.data,
+    });
+  }
+}
 
 const addPostAPI = (data) => {
   return axios.post('/api/post', data);
@@ -94,6 +125,15 @@ function* addComment(action) {
   }
 }
 
+function* watchLoadPosts() {
+  // throttle -> 너무 많은 스크롤 이벤트를 5초 안에 한 번만 실행 (하지만 요청된 REQUEST액션은 취소를 안한다.)
+  // 응답에 대한 것만 차단, 요청은 차단 못함
+  // 그러기 위해서 처음부터 요청을 안 보내면 된다. hasMorePosts && !loadPostsLoading
+  yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
+
+  /* 메모리 절약을 위한 -> react-virtualized 사용 */
+}
+
 function* watchAddPost() {
   yield takeLatest(ADD_POST_REQUEST, addPost);
 }
@@ -107,5 +147,10 @@ function* watchAddComment() {
 }
 
 export default function* postSaga() {
-  yield all([fork(watchAddPost), fork(watchRemovePost), fork(watchAddComment)]);
+  yield all([
+    fork(watchLoadPosts),
+    fork(watchAddPost),
+    fork(watchRemovePost),
+    fork(watchAddComment),
+  ]);
 }

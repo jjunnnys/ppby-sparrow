@@ -3,55 +3,12 @@ import prodece from 'immer';
 import faker from 'faker';
 
 export const initialSate = {
-  mainPosts: [
-    {
-      // 백엔드 개발자한테 어떤 식으로 데이터를 줄것이냐라고 물어보기
-      // sequelize 속성에서 다른 데이터의 속성과 합처서 주는 건 대문자로 적음
-      id: 1,
-      User: {
-        id: 1,
-        nickname: '민준',
-      },
-      content: '첫 번째 게시글 #해시태그 #익스프레스',
-      Images: [
-        {
-          id: shortId.generate(),
-          src:
-            'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F242DFD4752C93C7B20',
-        },
-        {
-          id: shortId.generate(),
-          src:
-            'https://img1.daumcdn.net/thumb/R720x0.q80/?scode=mtistory2&fname=http%3A%2F%2Fcfile24.uf.tistory.com%2Fimage%2F99A72E3D5A7F0F071F66CE',
-        },
-        {
-          id: shortId.generate(),
-          src:
-            'https://i.pinimg.com/originals/5a/ca/83/5aca83493f17caf160053e9b16d59890.jpg',
-        },
-      ],
-      // 대문자로 시작하는 건 서버에서 주는 데이터를 의미
-      Comments: [
-        {
-          id: shortId.generate(),
-          user: {
-            id: shortId.generate(),
-            nickname: 'ppby2',
-          },
-          content: '멋있다...',
-        },
-        {
-          id: shortId.generate(),
-          user: {
-            id: shortId.generate(),
-            nickname: 'ppby1',
-          },
-          content: '짱이다...',
-        },
-      ],
-    },
-  ],
+  mainPosts: [],
   imagePaths: [],
+  hasMorePosts: true, // 처음 게시물이 0개일 때는 포스트를 가져오는 시도를 해야함
+  loadPostsLoading: false,
+  loadPostsDone: false,
+  loadPostsError: null,
   addPostLoading: false,
   addPostDone: false,
   addPostError: null,
@@ -63,11 +20,15 @@ export const initialSate = {
   addCommentError: null,
 };
 
-/* 더미 포스트 데이터 추가 */
+/* 
+  서버에서 데이터 불러오는 테스 코드
+  - 무한 스크롤링 -> 스크롤을 다 하면 10개 불러오고 다 하면 10개 불러오고 
+  - saga에서 10개씩 불러오게 설정한다.
+*/
 
-// concat을 쓰면 앞에 대입을 해줘야 함
-initialSate.mainPosts = initialSate.mainPosts.concat(
-  Array(20)
+// saga 에서 쓰기 위해 export
+export const generateDummyPost = (number) =>
+  Array(number)
     .fill()
     .map(() => ({
       id: shortId.generate(),
@@ -92,10 +53,13 @@ initialSate.mainPosts = initialSate.mainPosts.concat(
           content: faker.lorem.sentences(),
         },
       ],
-    }))
-);
+    }));
 
 /* 액션 */
+
+export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
+export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
+export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -148,6 +112,24 @@ const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
   return prodece(state, (draft) => {
     switch (action.type) {
+      /* 로딩 포스트 추가 */
+      case LOAD_POSTS_REQUEST:
+        draft.loadPostsLoading = true;
+        draft.loadPostsDone = false;
+        draft.loadPostsError = null;
+        break;
+      case LOAD_POSTS_SUCCESS:
+        draft.loadPostsLoading = false;
+        draft.loadPostsDone = true;
+        // 10개 씩 포스터 불러오기, action.data의 기존 데이터에 draft.mainPosts 데이터 넣기
+        draft.mainPosts = action.data.concat(draft.mainPosts);
+        // 포스트 불러오기 제한 하기
+        draft.hasMorePosts = draft.mainPosts.length < 50; // 일단 50개 까지 임의로 설정, 50이 되면 false가 되서 포스트를 더 이상 안가져 온다.
+        break;
+      case LOAD_POSTS_FAILURE:
+        draft.loadPostsLoading = false;
+        draft.loadPostsError = action.error;
+        break;
       /* 포스트 추가 */
       case ADD_POST_REQUEST:
         draft.addPostLoading = true;
