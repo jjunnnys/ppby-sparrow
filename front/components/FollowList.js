@@ -9,7 +9,7 @@ const FollowList = ({ header, data }) => {
       style={{ marginBottom: 20 }}
       grid={{ gutter: 4, xs: 2, md: 3 }}
       size="small"
-      header={<div>{header}</div>}
+      header={<span>{header}</span>}
       loadMore={
         <div style={{ textAlign: 'center', margin: '10px 0' }}>
           <Button>더보가</Button>

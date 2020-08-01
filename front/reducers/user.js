@@ -73,8 +73,21 @@ const dummyUser = (data) => ({
   id: 1,
   /* 시퀄라이즈에서 합쳐준다. 대문자로 */
   Posts: [{ id: 1 }], // 내 가쓴 글
-  Followings: [{ nickname: 'pepperBoy' }], // 내가 팔로우한 사람
-  Followers: [{ nickname: '칠리걸' }], // 나를 팔로우한 사람
+  Followings: [
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+    { nickname: 'pepperBoy' },
+  ], // 내가 팔로우한 사람
+  Followers: [
+    { nickname: '칠리걸' },
+    { nickname: '칠리걸' },
+    { nickname: '칠리걸' },
+    { nickname: '칠리걸' },
+  ], // 나를 팔로우한 사람
 });
 
 const reducer = (state = initialSate, action) => {

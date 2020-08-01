@@ -1,5 +1,6 @@
 import shortId from 'shortid';
 import prodece from 'immer';
+import faker from 'faker';
 
 export const initialSate = {
   mainPosts: [
@@ -62,6 +63,38 @@ export const initialSate = {
   addCommentError: null,
 };
 
+/* 더미 포스트 데이터 추가 */
+
+// concat을 쓰면 앞에 대입을 해줘야 함
+initialSate.mainPosts = initialSate.mainPosts.concat(
+  Array(20)
+    .fill()
+    .map(() => ({
+      id: shortId.generate(),
+      User: {
+        id: shortId.generate(),
+        nickname: faker.name.findName(),
+      },
+      content: faker.lorem.paragraph(),
+      Images: [
+        {
+          id: shortId.generate(),
+          src: faker.image.image(),
+        },
+      ],
+      Comments: [
+        {
+          id: shortId.generate(),
+          user: {
+            id: shortId.generate(),
+            nickname: faker.name.findName(),
+          },
+          content: faker.lorem.sentences(),
+        },
+      ],
+    }))
+);
+
 /* 액션 */
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
@@ -96,13 +129,7 @@ const dummyPost = ({ id, content }) => ({
     id: 1,
     nickname: 'ppby',
   },
-  Images: [
-    {
-      id: shortId.generate(),
-      src:
-        'https://cdn.pixabay.com/photo/2014/11/30/14/11/kitty-551554_960_720.jpg',
-    },
-  ],
+  Images: [],
   Comments: [],
 });
 
