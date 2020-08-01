@@ -24,6 +24,14 @@
     "react/jsx-one-expression-per-line": "off",
     "object-curly-newline": "off",
     "linebreak-style": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+    "import/no-unresolved": "off",
+    "arrow-body-style": "off",
+    "react/jsx-wrap-multilines": "off",
+    "react/prop-types": "off",
+    "comma-dangle": "off",
+    "no-trailing-spaces": "off",
+    "react/react-in-jsx-scope": "off",
+    "no-case-declarations": "off"
   }
 }

@@ -11,6 +11,9 @@ export const initialSate = {
   signUpLoading: false, // 회원가입 시도 중
   signUpDone: false,
   signUpError: null,
+  changeNicknameLoading: false, // 닉네임 변경 시도 중
+  changeNicknameDone: false,
+  changeNicknameError: null,
 };
 
 /* 액션 */
@@ -35,6 +38,10 @@ export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 
+export const CHANGE_NICKNAME_REQUEST = 'UNFOLLOW_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'UNFOLLOW_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'UNFOLLOW_FAILURE';
+
 /* 액션 생성함수 (saga가 성공과 실패 했을 때 액션을 호출해 주기 때문에 (SUCCESS,FAILURE) 굳이 안 만들어도 된다.) */
 
 export const loginRequestAction = (data) => {
@@ -57,7 +64,7 @@ const dummyUser = (data) => ({
   nickname: '민준',
   id: 1,
   /* 시퀄라이즈에서 합쳐준다. 대문자로 */
-  Posts = [], // 내 가쓴 글
+  Posts: [], // 내 가쓴 글
   Followings: [], // 내가 팔로우한 사람
   Followers: [], // 나를 팔로우한 사람
 });
@@ -112,7 +119,7 @@ const reducer = (state = initialSate, action) => {
     case SIGN_UP_REQUEST:
       return {
         ...state,
-        signUpLoading: true, 
+        signUpLoading: true,
         signUpDone: false,
         signUpError: null,
       };
@@ -127,6 +134,26 @@ const reducer = (state = initialSate, action) => {
         ...state,
         signUpLoading: false,
         signUpError: action.error,
+      };
+    // 닉네임 바꾸기
+    case CHANGE_NICKNAME_REQUEST:
+      return {
+        ...state,
+        changeNicknameLoading: true,
+        changeNicknameDone: false,
+        changeNicknameError: null,
+      };
+    case CHANGE_NICKNAME_SUCCESS:
+      return {
+        ...state,
+        changeNicknameLoading: false,
+        changeNicknameDone: true,
+      };
+    case CHANGE_NICKNAME_FAILURE:
+      return {
+        ...state,
+        changeNicknameLoading: false,
+        changeNicknameError: action.error,
       };
     default:
       return state;

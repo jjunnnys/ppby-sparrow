@@ -2,8 +2,8 @@ import React, { useCallback } from 'react';
 import { Form, Input, Button } from 'antd';
 import Link from 'next/Link';
 import styled from 'styled-components';
-import useInput from '../hooks/useInput';
 import { useDispatch, useSelector } from 'react-redux';
+import useInput from '../hooks/useInput';
 import { loginRequestAction } from '../reducers/user';
 
 const ButtonWrapper = styled.div`
@@ -17,7 +17,7 @@ const FormWrapper = styled(Form)`
 const LoginForm = () => {
   const [email, onChangeEmail] = useInput(''); // mysql에서 id 값을 자동으로 붙혀주는 거랑 헷갈릴 수 있어서 (email로 바꿈)
   const [password, onChangePassword] = useInput('');
-  const { logInDone } = useSelector((state) => state.user);
+  const { logInLoading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const onSubmitForm = useCallback(() => {
@@ -27,7 +27,7 @@ const LoginForm = () => {
         password,
       })
     );
-  }, [id, password]);
+  }, [email, password]);
 
   return (
     // 버튼에서 submit이 되면 onFinish가 호출된다.
@@ -55,7 +55,7 @@ const LoginForm = () => {
         />
       </div>
       <ButtonWrapper>
-        <Button type="primary" htmlType="submit" loading={logInDone}>
+        <Button type="primary" htmlType="submit" loading={logInLoading}>
           로그인
         </Button>
         <Link href="/signup">

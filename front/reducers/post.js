@@ -1,3 +1,5 @@
+import shortId from 'shortid';
+
 export const initialSate = {
   mainPosts: [
     {
@@ -25,12 +27,14 @@ export const initialSate = {
       ],
       Comments: [
         {
+          id: 1,
           user: {
             nickname: 'ppby2',
           },
           content: '멋있다...',
         },
         {
+          id: 2,
           user: {
             nickname: 'ppby1',
           },
@@ -70,16 +74,25 @@ export const addComment = (data) => ({
   data,
 });
 
-const dummyPost = {
-  id: 2,
-  content: '더미데이터입니다.',
+const dummyPost = (data) => ({
+  id: shortId.generate(), // id를 정하기 애매할 떄 사용
+  content: data,
   User: {
     id: 1,
     nickname: 'ppby',
   },
   Images: [],
   Comments: [],
-};
+});
+
+const dummyComment = (data) => ({
+  id: shortId.generate(), // id를 정하기 애매할 떄 사용
+  content: data,
+  user: {
+    id: 1,
+    nickname: 'ppby',
+  },
+});
 
 const reducer = (state = initialSate, action) => {
   switch (action.type) {
@@ -94,7 +107,7 @@ const reducer = (state = initialSate, action) => {
     case ADD_POST_SUCCESS:
       return {
         ...state,
-        mainPosts: [dummyPost, ...state.mainPosts],
+        mainPosts: [dummyPost(action.data), ...state.mainPosts],
         addPostLoading: false,
         addPostDone: true,
       };
@@ -112,12 +125,22 @@ const reducer = (state = initialSate, action) => {
         addCommentDone: false,
         addCommentError: null,
       };
-    case ADD_COMMENT_SUCCESS:
+    case ADD_COMMENT_SUCCESS: {
+      // 게시글 id를 통해서 찾고 그 안에 Comments로 접근한다.
+      const postIndex = state.mainPosts.findIndex(
+        (value) => value.id === action.data.postId
+      );
+      const post = state.mainPosts[postIndex];
+      post.Comments = [dummyComment(action.data.content), ...post.Comments];
+      const mainPosts = [...state.mainPosts];
+      mainPosts[postIndex] = post;
       return {
         ...state,
+        mainPosts,
         addCommentDone: true,
         addCommentLoading: false,
       };
+    }
     case ADD_COMMENT_FAILURE:
       return {
         ...state,
