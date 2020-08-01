@@ -1,4 +1,5 @@
 import shortId from 'shortid';
+import prodece from 'immer';
 
 export const initialSate = {
   mainPosts: [
@@ -114,83 +115,71 @@ const dummyComment = (data) => ({
   },
 });
 
+/* 리듀서란? 이전 상태를 액션을 통해 다음 상태로 만들어내는 함수(불변성 유지) */
+
 const reducer = (state = initialSate, action) => {
-  switch (action.type) {
-    // 포스트 추가
-    case ADD_POST_REQUEST:
-      return {
-        ...state,
-        addPostLoading: true,
-        addPostDone: false,
-        addPostError: null,
-      };
-    case ADD_POST_SUCCESS:
-      return {
-        ...state,
-        mainPosts: [dummyPost(action.data), ...state.mainPosts],
-        addPostLoading: false,
-        addPostDone: true,
-      };
-    case ADD_POST_FAILURE:
-      return {
-        ...state,
-        addPostLoading: false,
-        addPostError: action.error,
-      };
-    // 포스트 삭제
-    case REMOVE_POST_REQUEST:
-      return {
-        ...state,
-        removePostLoading: true,
-        removePostDone: false,
-        removePostError: null,
-      };
-    case REMOVE_POST_SUCCESS:
-      return {
-        ...state,
-        mainPosts: state.mainPosts.filter((value) => value.id !== action.data),
-        removePostLoading: false,
-        removePostDone: true,
-      };
-    case REMOVE_POST_FAILURE:
-      return {
-        ...state,
-        removePostLoading: false,
-        removePostError: action.error,
-      };
-    // 댓글
-    case ADD_COMMENT_REQUEST:
-      return {
-        ...state,
-        addCommentLoading: true,
-        addCommentDone: false,
-        addCommentError: null,
-      };
-    case ADD_COMMENT_SUCCESS: {
-      // 게시글 id를 통해서 찾고 그 안에 Comments로 접근한다.
-      const postIndex = state.mainPosts.findIndex(
-        (value) => value.id === action.data.postId
-      );
-      const post = state.mainPosts[postIndex];
-      post.Comments = [dummyComment(action.data.content), ...post.Comments];
-      const mainPosts = [...state.mainPosts];
-      mainPosts[postIndex] = post;
-      return {
-        ...state,
-        mainPosts,
-        addCommentDone: true,
-        addCommentLoading: false,
-      };
+  // state는 건들면 안 됨, 기존에 state를 draft로 대체
+  return prodece(state, (draft) => {
+    switch (action.type) {
+      /* 포스트 추가 */
+      case ADD_POST_REQUEST:
+        draft.addPostLoading = true;
+        draft.addPostDone = false;
+        draft.addPostError = null;
+        break;
+      case ADD_POST_SUCCESS:
+        draft.addPostLoading = false;
+        draft.addPostDone = true;
+        draft.mainPosts.unshift(dummyPost(action.data));
+        break;
+      case ADD_POST_FAILURE:
+        draft.addPostLoading = false;
+        draft.addPostError = action.error;
+        break;
+      /* 포스트 삭제 */
+      case REMOVE_POST_REQUEST:
+        draft.removePostLoading = true;
+        draft.removePostDone = false;
+        draft.removePostError = null;
+        break;
+      case REMOVE_POST_SUCCESS:
+        draft.removePostLoading = false;
+        draft.removePostDone = true;
+        // 지울때만 filter를 사용해서 편하게 함 (아니면 splice를 써야함)
+        draft.mainPosts = draft.mainPosts.filter(
+          (value) => value.id !== action.data
+        );
+        break;
+      case REMOVE_POST_FAILURE:
+        draft.removePostLoading = false;
+        draft.removePostError = action.error;
+        break;
+      /* 댓글 */
+      case ADD_COMMENT_REQUEST:
+        draft.addCommentLoading = true;
+        draft.addCommentDone = false;
+        draft.addCommentError = null;
+        break;
+      case ADD_COMMENT_SUCCESS: {
+        // 1. 게시글 id 찾기
+        const post = draft.mainPosts.find(
+          (value) => value.id === action.data.postId
+        );
+        // 2. 그 게시글에 댓글 추가
+        post.Comments.unshift(dummyComment(action.data.content));
+
+        draft.addCommentLoading = false;
+        draft.addCommentDone = true;
+        break;
+      }
+      case ADD_COMMENT_FAILURE:
+        draft.addCommentLoading = false;
+        draft.addCommentError = action.error;
+        break;
+      default:
+        break;
     }
-    case ADD_COMMENT_FAILURE:
-      return {
-        ...state,
-        addCommentLoading: false,
-        addCommentError: action.error,
-      };
-    default:
-      return state;
-  }
+  });
 };
 
 export default reducer;

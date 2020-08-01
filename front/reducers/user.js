@@ -1,3 +1,5 @@
+import produce from 'immer';
+
 export const initialSate = {
   userInfo: null,
   signUpdate: {},
@@ -76,112 +78,80 @@ const dummyUser = (data) => ({
 });
 
 const reducer = (state = initialSate, action) => {
-  // 직접 바꾸면 참조관계가 유지돼서 history가 안 남는다.
-  switch (action.type) {
-    // 로그인
-    case LOG_IN_REQUEST:
-      console.log('reducer login');
-      return {
-        ...state,
-        logInLoading: true,
-        logInDone: false,
-        logInError: null,
-      };
-    case LOG_IN_SUCCESS:
-      return {
-        ...state,
-        logInLoading: false,
-        logInDone: true,
-        userInfo: dummyUser(action.data),
-      };
-    case LOG_IN_FAILURE:
-      return {
-        ...state,
-        logInLoading: false,
-        logInError: action.error,
-      };
-    // 로그아웃
-    case LOG_OUT_REQUEST:
-      return {
-        ...state,
-        logOutLoading: true,
-        logOutDone: false,
-        logOutError: null,
-      };
-    case LOG_OUT_SUCCESS:
-      return {
-        ...state,
-        logOutLoading: false,
-        logOutDone: true,
-        userInfo: null,
-      };
-    case LOG_OUT_FAILURE:
-      return {
-        ...state,
-        logOutLoading: false,
-        logOutError: action.error,
-      };
-    // 회원가입
-    case SIGN_UP_REQUEST:
-      return {
-        ...state,
-        signUpLoading: true,
-        signUpDone: false,
-        signUpError: null,
-      };
-    case SIGN_UP_SUCCESS:
-      return {
-        ...state,
-        signUpLoading: false,
-        signUpDone: true,
-      };
-    case SIGN_UP_FAILURE:
-      return {
-        ...state,
-        signUpLoading: false,
-        signUpError: action.error,
-      };
-    // 닉네임 바꾸기
-    case CHANGE_NICKNAME_REQUEST:
-      return {
-        ...state,
-        changeNicknameLoading: true,
-        changeNicknameDone: false,
-        changeNicknameError: null,
-      };
-    case CHANGE_NICKNAME_SUCCESS:
-      return {
-        ...state,
-        changeNicknameLoading: false,
-        changeNicknameDone: true,
-      };
-    case CHANGE_NICKNAME_FAILURE:
-      return {
-        ...state,
-        changeNicknameLoading: false,
-        changeNicknameError: action.error,
-      };
-    case ADD_POST_TO_USER_INFO:
-      return {
-        ...state,
-        userInfo: {
-          ...state.userInfo,
-          Posts: [{ id: action.data }, ...state.userInfo.Posts],
-        },
-      };
-    case REMOVE_POST_OF_USER_INFO:
-      return {
-        ...state,
-        userInfo: {
-          ...state.userInfo,
-          Posts: state.userInfo.Posts.filter(
-            (value) => value.id !== action.data
-          ),
-        },
-      };
-    default:
-      return state;
-  }
+  return produce(state, (draft) => {
+    switch (action.type) {
+      /* 로그인 */
+      case LOG_IN_REQUEST:
+        draft.logInLoading = true;
+        draft.logInDone = false;
+        draft.logInError = null;
+        break;
+      case LOG_IN_SUCCESS:
+        draft.userInfo = dummyUser(action.data);
+        draft.logInLoading = false;
+        draft.logInDone = true;
+        break;
+      case LOG_IN_FAILURE:
+        draft.logInLoading = false;
+        draft.logInError = action.error;
+        break;
+      /* 로그아웃 */
+      case LOG_OUT_REQUEST:
+        draft.logOutLoading = true;
+        draft.logOutDone = false;
+        draft.logOutError = null;
+        break;
+      case LOG_OUT_SUCCESS:
+        draft.userInfo = null;
+        draft.logOutLoading = false;
+        draft.logOutDone = true;
+        break;
+      case LOG_OUT_FAILURE:
+        draft.logOutLoading = false;
+        draft.logOutError = action.error;
+        break;
+      /* 회원가입 */
+      case SIGN_UP_REQUEST:
+        draft.signUpLoading = true;
+        draft.signUpDone = false;
+        draft.signUpError = null;
+        break;
+      case SIGN_UP_SUCCESS:
+        draft.signUpLoading = false;
+        draft.signUpDone = true;
+        break;
+      case SIGN_UP_FAILURE:
+        draft.signUpLoading = false;
+        draft.signUpError = action.error;
+        break;
+      /* 닉네임 바꾸기 */
+      case CHANGE_NICKNAME_REQUEST:
+        draft.changeNicknameLoading = true;
+        draft.changeNicknameDone = false;
+        draft.changeNicknameError = null;
+        break;
+      case CHANGE_NICKNAME_SUCCESS:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameDone = true;
+        break;
+      case CHANGE_NICKNAME_FAILURE:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameError = action.error;
+        break;
+      /* 게시글 작성 수 추가 */
+      case ADD_POST_TO_USER_INFO:
+        draft.userInfo.Posts.unshift({ id: action.data });
+        break;
+      /* 게시글 작성 수 삭제 */
+      case REMOVE_POST_OF_USER_INFO:
+        draft.userInfo.Posts = draft.userInfo.Posts.filter(
+          (value) => value.id !== action.data
+        );
+        break;
+      default:
+        break;
+    }
+  });
 };
 
 export default reducer;
