@@ -5,7 +5,7 @@ import { logoutRequestAction } from '../reducers/user';
 
 const UserProfile = () => {
   const dispatch = useDispatch();
-  const { userInfo, isLoggingOut } = useSelector((state) => state.user);
+  const { userInfo, logOutLoading } = useSelector((state) => state.user);
 
   const onLogout = useCallback(() => {
     dispatch(logoutRequestAction());
@@ -15,22 +15,19 @@ const UserProfile = () => {
     <Card
       actions={[
         <div key="twit">
-          <dl>
-            <dt>짹짹</dt>
-            <dd>0</dd>
-          </dl>
+          짹짹
+          <br />
+          {userInfo.Posts.length}
         </div>,
         <div key="followings">
-          <dl>
-            <dt>팔로잉</dt>
-            <dd>0</dd>
-          </dl>
+          팔로잉
+          <br />
+          {userInfo.Followings.length}
         </div>,
         <div key="follower">
-          <dl>
-            <dt>팔로워</dt>
-            <dd>0</dd>
-          </dl>
+          팔로잉
+          <br />
+          {userInfo.Followers.length}
         </div>,
       ]}
     >
@@ -38,7 +35,7 @@ const UserProfile = () => {
         avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
         title={userInfo.nickname}
       />
-      <Button onClick={onLogout} loading={isLoggingOut}>
+      <Button onClick={onLogout} loading={logOutLoading}>
         로그아웃
       </Button>
     </Card>

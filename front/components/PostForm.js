@@ -1,23 +1,27 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { addPost } from '../reducers/post';
+import useInput from '../hooks/useInput';
 
 const PostForm = () => {
-  const { imagePaths } = useSelector((state) => state.post);
-  const [text, setText] = useState('');
+  const { imagePaths, addPostDone, addPostLoading } = useSelector(
+    (state) => state.post
+  );
+  const [text, onChangeText, setText] = useInput('');
+
+  useEffect(() => {
+    if (addPostDone) {
+      setText(''); // 서버에서 문제가 생길 수 있기 떄문에 확실하게 post등록이 완료 후 text를 비워준다.
+    }
+  }, [addPostDone]);
+
   const dispatch = useDispatch();
-  const imageInput = useRef();
-
-  const onChangeText = useCallback((e) => {
-    setText(e.target.value);
-  }, []);
-
   const onSubmit = useCallback(() => {
-    dispatch(addPost);
-    setText('');
-  }, []);
+    dispatch(addPost(text));
+  }, [text]);
 
+  const imageInput = useRef();
   const onClickImageUpload = useCallback(() => {
     imageInput.current.click();
   }, [imageInput.current]);
@@ -37,7 +41,12 @@ const PostForm = () => {
       <div>
         <input type="file" multiple hidden ref={imageInput} />
         <Button onClick={onClickImageUpload}>이미지 업로드</Button>
-        <Button type="primary" style={{ float: 'right' }} htmlType="submit">
+        <Button
+          type="primary"
+          style={{ float: 'right' }}
+          htmlType="submit"
+          loading={addPostLoading}
+        >
           짹쨱
         </Button>
       </div>

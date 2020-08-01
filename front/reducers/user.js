@@ -1,3 +1,5 @@
+import produce from 'immer';
+
 export const initialSate = {
   userInfo: null,
   signUpdate: {},
@@ -11,6 +13,9 @@ export const initialSate = {
   signUpLoading: false, // 회원가입 시도 중
   signUpDone: false,
   signUpError: null,
+  changeNicknameLoading: false, // 닉네임 변경 시도 중
+  changeNicknameDone: false,
+  changeNicknameError: null,
 };
 
 /* 액션 */
@@ -23,9 +28,9 @@ export const LOG_OUT_REQUEST = 'LOG_OUT_REQUEST';
 export const LOG_OUT_SUCCESS = 'LOG_OUT_SUCCESS';
 export const LOG_OUT_FAILURE = 'LOG_OUT_FAILURE';
 
-export const SIGNUP_REQUEST = 'SIGNUP_REQUEST';
-export const SIGNUP_SUCCESS = 'SIGNUP_SUCCESS';
-export const SIGNUP_FAILURE = 'SIGNUP_FAILURE';
+export const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
+export const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
+export const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
 
 export const FOLLOW_REQUEST = 'FOLLOW_REQUEST';
 export const FOLLOW_SUCCESS = 'FOLLOW_SUCCESS';
@@ -34,6 +39,14 @@ export const FOLLOW_FAILURE = 'FOLLOW_FAILURE';
 export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
+
+export const CHANGE_NICKNAME_REQUEST = 'UNFOLLOW_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'UNFOLLOW_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'UNFOLLOW_FAILURE';
+
+// 리듀셔는 액션을 통해서 상태를 바꿀 수 있기 떄문에 post 관련 액션을 만든다.
+export const ADD_POST_TO_USER_INFO = 'ADD_POST_TO_USER_INFO';
+export const REMOVE_POST_OF_USER_INFO = 'REMOVE_POST_OF_USER_INFO';
 
 /* 액션 생성함수 (saga가 성공과 실패 했을 때 액션을 호출해 주기 때문에 (SUCCESS,FAILURE) 굳이 안 만들어도 된다.) */
 
@@ -52,85 +65,93 @@ export const logoutRequestAction = () => {
 
 /* 더미 유저 데이터 함수 만들기 */
 
+// useInfo에 해당
 const dummyUser = (data) => ({
+  // data -> email, password
   ...data,
   nickname: '민준',
   id: 1,
   /* 시퀄라이즈에서 합쳐준다. 대문자로 */
-  Posts = [], // 내 가쓴 글
-  Followings: [], // 내가 팔로우한 사람
-  Followers: [], // 나를 팔로우한 사람
+  Posts: [{ id: 1 }], // 내 가쓴 글
+  Followings: [{ nickname: 'pepperBoy' }], // 내가 팔로우한 사람
+  Followers: [{ nickname: '칠리걸' }], // 나를 팔로우한 사람
 });
 
 const reducer = (state = initialSate, action) => {
-  // 직접 바꾸면 참조관계가 유지돼서 history가 안 남는다.
-  switch (action.type) {
-    // 로그인
-    case LOG_IN_REQUEST:
-      console.log('reducer login');
-      return {
-        ...state,
-        logInLoading: true,
-        logInDone: false,
-        logInError: null,
-      };
-    case LOG_IN_SUCCESS:
-      return {
-        ...state,
-        logInLoading: false,
-        logInDone: true,
-        userInfo: dummyUser(action.data),
-      };
-    case LOG_IN_FAILURE:
-      return {
-        ...state,
-        logInLoading: false,
-        logInError: action.error,
-      };
-    // 로그아웃
-    case LOG_OUT_REQUEST:
-      return {
-        ...state,
-        logOutLoading: true,
-        logOutDone: false,
-        logOutError: null,
-      };
-    case LOG_OUT_SUCCESS:
-      return {
-        ...state,
-        logOutLoading: false,
-        logOutDone: true,
-        userInfo: null,
-      };
-    case LOG_OUT_FAILURE:
-      return {
-        ...state,
-        logOutLoading: false,
-        logOutError: action.error,
-      };
-    // 회원가입
-    case SIGNUP_REQUEST:
-      return {
-        ...state,
-        signUpLoading: true, 
-        signUpDone: false,
-        signUpError: null,
-      };
-    case SIGNUP_SUCCESS:
-      return {
-        ...state,
-        signUpLoading: false,
-        signUpDone: true,
-      };
-    case SIGNUP_FAILURE:
-      return {
-        ...state,
-        signUpLoading: false,
-        signUpError: action.error,
-      };
-    default:
-      return state;
-  }
+  return produce(state, (draft) => {
+    switch (action.type) {
+      /* 로그인 */
+      case LOG_IN_REQUEST:
+        draft.logInLoading = true;
+        draft.logInDone = false;
+        draft.logInError = null;
+        break;
+      case LOG_IN_SUCCESS:
+        draft.userInfo = dummyUser(action.data);
+        draft.logInLoading = false;
+        draft.logInDone = true;
+        break;
+      case LOG_IN_FAILURE:
+        draft.logInLoading = false;
+        draft.logInError = action.error;
+        break;
+      /* 로그아웃 */
+      case LOG_OUT_REQUEST:
+        draft.logOutLoading = true;
+        draft.logOutDone = false;
+        draft.logOutError = null;
+        break;
+      case LOG_OUT_SUCCESS:
+        draft.userInfo = null;
+        draft.logOutLoading = false;
+        draft.logOutDone = true;
+        break;
+      case LOG_OUT_FAILURE:
+        draft.logOutLoading = false;
+        draft.logOutError = action.error;
+        break;
+      /* 회원가입 */
+      case SIGN_UP_REQUEST:
+        draft.signUpLoading = true;
+        draft.signUpDone = false;
+        draft.signUpError = null;
+        break;
+      case SIGN_UP_SUCCESS:
+        draft.signUpLoading = false;
+        draft.signUpDone = true;
+        break;
+      case SIGN_UP_FAILURE:
+        draft.signUpLoading = false;
+        draft.signUpError = action.error;
+        break;
+      /* 닉네임 바꾸기 */
+      case CHANGE_NICKNAME_REQUEST:
+        draft.changeNicknameLoading = true;
+        draft.changeNicknameDone = false;
+        draft.changeNicknameError = null;
+        break;
+      case CHANGE_NICKNAME_SUCCESS:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameDone = true;
+        break;
+      case CHANGE_NICKNAME_FAILURE:
+        draft.changeNicknameLoading = false;
+        draft.changeNicknameError = action.error;
+        break;
+      /* 게시글 작성 수 추가 */
+      case ADD_POST_TO_USER_INFO:
+        draft.userInfo.Posts.unshift({ id: action.data });
+        break;
+      /* 게시글 작성 수 삭제 */
+      case REMOVE_POST_OF_USER_INFO:
+        draft.userInfo.Posts = draft.userInfo.Posts.filter(
+          (value) => value.id !== action.data
+        );
+        break;
+      default:
+        break;
+    }
+  });
 };
 
 export default reducer;

@@ -4,7 +4,7 @@
     2. 구현하기
 */
 import React, { useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import {
@@ -17,10 +17,14 @@ import {
 import PostImages from './PostImages';
 import CommentForm from './CommentForm';
 import PostCardContent from './PostCardContent';
+import { REMOVE_POST_REQUEST } from '../reducers/post';
 
 const PostCard = ({ post }) => {
   const [liked, setLiked] = useState(false);
   const [commentFormOpend, setCommentFormOpend] = useState(false);
+  const dispatch = useDispatch();
+  const { removePostLoading } = useSelector((state) => state.post);
+  const { userInfo } = useSelector((state) => state.user);
 
   const onToggleLike = useCallback(() => {
     // 토글 이벤트에선 항상 (prev)=>!prev (이전 데이터의 반대 값을 리턴)
@@ -31,7 +35,13 @@ const PostCard = ({ post }) => {
     setCommentFormOpend((prev) => !prev);
   }, []);
 
-  const { userInfo } = useSelector((state) => state.user);
+  const onRemovePost = useCallback(() => {
+    dispatch({
+      type: REMOVE_POST_REQUEST,
+      data: post.id,
+    });
+  }, [post]);
+
   // 새로운 문법 ( userInfo && userInfo.id ) 와 동일 -> optional chaining
   const id = userInfo?.id;
   // 더 간단하게
@@ -63,7 +73,13 @@ const PostCard = ({ post }) => {
                 {id && post.User.id === id ? (
                   <>
                     <Button>수정</Button>
-                    <Button type="danger">삭제</Button>
+                    <Button
+                      type="danger"
+                      onClick={onRemovePost}
+                      loading={removePostLoading}
+                    >
+                      삭제
+                    </Button>
                   </>
                 ) : (
                   <Button>신고</Button>

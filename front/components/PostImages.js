@@ -18,7 +18,10 @@ const PostImages = ({ images }) => {
   if (images.length === 1) {
     return (
       <>
-        {/* role="presentation" -> 스크린리더가 이걸 클릭은 할 수 있지만 꼭 클릭할 필요는 없다라고 알려 줌 (버튼이나 인풋이 아닌 태그에 onClick을 쓸 경우 작성) */}
+        {/* 
+          role="presentation" -> 
+          스크린리더가 이걸 클릭은 할 수 있지만 꼭 클릭할 필요는 없다라고 알려 줌 (버튼이나 인풋이 아닌 태그에 onClick을 쓸 경우 작성) 
+        */}
         <img
           role="presentation"
           src={images[0].src}
