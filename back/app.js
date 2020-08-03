@@ -1,5 +1,6 @@
 const express = require('express');
 const postRouter = require('./routes/post');
+const userRouter = require('./routes/user');
 const db = require('./models');
 const app = express();
 
@@ -8,6 +9,7 @@ const app = express();
   - swagger 라는 툴을 사용하여 API 문서를 뽑는다.
   - !!하나의 요청엔 하나의 응답
   - 시퀄라이즈 세팅 $ npx sequelize init
+  - 스케일업 할 경우 서버를 쪼개서 두는게 좋다.
 
   get -> 가져오다
   post -> 생성하다 (애매하면 그냥 post 쓰기)
@@ -26,19 +28,17 @@ db.sequelize
   })
   .catch(console.error);
 
+// 프론트에서 받아 온 데이터를 req.body어 넣기 위한 작업
+// 상위에 적어야한다. 미들웨어 특성 상 요청한 데이터를 위에서 아래로 시작이 된다.
+app.use(express.json()); // json 형태로 req.body에 담는다.
+app.use(express.urlencoded({ extended: true })); // form submit 데이터를 처리
+
 app.get('/', (req, res) => {
   res.send('hello express');
 });
 
-app.get('/api/posts', (req, res) => {
-  res.json([
-    { id: 1, content: 'hello' },
-    { id: 2, content: 'hello2' },
-    { id: 3, content: 'hello3' },
-  ]);
-});
-
 app.use('/post', postRouter); // 중복되는 '/post' 를 뽑아 줬음 (prefix:접두사)
+app.use('/user', userRouter);
 
 app.listen(3065, () => {
   console.log('서버 실행 중');
