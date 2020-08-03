@@ -7,6 +7,7 @@ const app = express();
   - restAPI 방식 -> 정확히 지키기는 불가능 (팀원끼리 타협을 봐야함)
   - swagger 라는 툴을 사용하여 API 문서를 뽑는다.
   - !!하나의 요청엔 하나의 응답
+  - 시퀄라이즈 세팅 $ npx sequelize init
 
   get -> 가져오다
   post -> 생성하다 (애매하면 그냥 post 쓰기)
