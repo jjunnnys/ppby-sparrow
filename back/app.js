@@ -29,7 +29,7 @@ app.get('/api/posts', (req, res) => {
   ]);
 });
 
-app.use('/post', postRou ter); // 중복되는 '/post' 를 뽑아 줬음 (prefix:접두사)
+app.use('/post', postRouter); // 중복되는 '/post' 를 뽑아 줬음 (prefix:접두사)
 
 app.listen(3065, () => {
   console.log('서버 실행 중');
