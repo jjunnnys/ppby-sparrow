@@ -5,12 +5,15 @@
   "author": "ppby",
   "license": "MIT",
   "scripts": {
-    "dev": ""
+    "dev": "nodemon app"
   },
   "dependencies": {
     "express": "4.17.1",
     "mysql2": "2.1.0",
     "sequelize": "6.3.4",
     "sequelize-cli": "6.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.4"
   }
 }

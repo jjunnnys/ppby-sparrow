@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     db.Post.hasMany(db.Comment);
     db.Post.hasMany(db.Image);
     // N:M
-    db.Post.belongsToMany(db.Hashtag);
+    db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' });
     db.Post.belongsToMany(db.User, { through: 'Like', as: 'Liked' }); // 게시글과 좋아요 관계 (반대 쪽에서도 똑같이 작성, 안 하면 두개의 테이블 명을 합친다.)
     // 좋아요를 누른 사람, as 로 별칭을 붙힌다.
     // 리트윗 기능

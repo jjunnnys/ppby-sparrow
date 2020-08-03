@@ -1,6 +1,6 @@
 const express = require('express');
 const postRouter = require('./routes/post');
-
+const db = require('./models');
 const app = express();
 
 /* 
@@ -17,6 +17,14 @@ const app = express();
   options -> 찔러보기 (ex. '나 요청 보낼 수 있어??' 이 정도로 이해)
   head -> 헤더만 가져오기(헤더/바디)
 */
+
+// (프로미스) 서버 실핼 할 때 시퀄라이즈 연결도 같이 된다.
+db.sequelize
+  .sync()
+  .then(() => {
+    console.log('db 연결 성공');
+  })
+  .catch(console.error);
 
 app.get('/', (req, res) => {
   res.send('hello express');
