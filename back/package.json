@@ -1,0 +1,13 @@
+{
+  "name": "react-nodebird-back",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "ppby",
+  "license": "MIT",
+  "scripts": {
+    "dev": ""
+  },
+  "dependencies": {
+    "express": "4.17.1"
+  }
+}
