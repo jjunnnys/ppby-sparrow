@@ -12,7 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       collate: 'utf8mb4_general_ci',
     }
   );
-  Comment.associate = (db) => {};
+  Comment.associate = (db) => {
+    // Comment는 User에 속해 있다.
+    db.Comment.belongsTo(db.User);
+  };
 
   return Comment;
 };
