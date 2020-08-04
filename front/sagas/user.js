@@ -58,17 +58,16 @@ function* unfollow(action) {
   }
 }
 
-const logInAPI = () => {
-  return axios.post('/api/login');
+const logInAPI = (data) => {
+  return axios.post('/user/login', data);
 };
 
 function* logIn(action) {
   try {
-    // const result = yield call(logInAPI)
-    yield delay(1000);
+    const result = yield call(logInAPI, action.data);
     yield put({
       type: LOG_IN_SUCCESS,
-      data: action.data, // loginRequest에서 들어 온 데이터를 SUCCESS로 보냄
+      data: result.data, // 서버로부터 사용자 정보 받아 온다.
     });
   } catch (error) {
     yield put({
@@ -79,7 +78,7 @@ function* logIn(action) {
 }
 
 const logOutAPI = () => {
-  return axios.post('/api/logout');
+  return axios.post('/user/logout');
 };
 
 function* logOut() {
@@ -99,7 +98,7 @@ function* logOut() {
 }
 
 const signUpAPI = (data) => {
-  return axios.post('http://localhost:3065/user', data); // action을 통해 받아온 데이터를 req.body에 넣어 줌
+  return axios.post('/user', data); // action을 통해 받아온 데이터를 req.body에 넣어 줌
 };
 
 function* signUp(action) {
@@ -108,7 +107,6 @@ function* signUp(action) {
     console.log(result);
     yield put({
       type: SIGN_UP_SUCCESS,
-      data: null,
     });
   } catch (error) {
     // 서버에서 400번, 500번 대에 chatch로 온다.

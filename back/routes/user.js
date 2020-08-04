@@ -1,6 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt'); // 패스워드 암호화 라이브러리
+const passport = require('passport');
+
 const { User } = require('../models');
+
 const router = express.Router();
 
 /*
@@ -20,7 +23,32 @@ const router = express.Router();
   - 하지만 편하게 미들웨어로 처리
 */
 
-// 라우터를 일치하게 만들어 줌
+// 로그인은 메소드가 애매하니까 post로 만든다.
+router.post('/login', (req, res, next) => {
+  // 이렇게 하면 미들웨어를 확장 (express 기법)
+  passport.authenticate('local', (err, user, info) => {
+    // (파라미터 이름은 마음대로) done에서 받아온 값 (콜백함수 같음)
+    if (err) {
+      console.error(err);
+      return next(err);
+    }
+    if (info) {
+      return res.status(401).send(info.reason); // 401: 허가되지 않음
+    }
+    // passport 로그인
+    return req.login(user, async (loginErr) => {
+      // 혹시나 passport에서 로그인할 때 에러날 수 있어서 만들어 준다.
+      if (loginErr) {
+        console.log(loginErr);
+        return next(loginErr);
+      }
+      return res.json(user); // 사용자 정보를 프론트로 넘긴다.
+      // loginErr가 없으면 서비스 로그인과 passport 로그인이 성공
+    });
+  })(req, res, next); // (req, res, next) 를 쓰기 위해 이렇게 작성
+}); // POST /user/login
+
+// POST /user/
 router.post('/', async (req, res, next) => {
   try {
     // (공식문서 보고 비동기 함수인지 찾는다.) exUser에 req.body.email이 기존 테이블 안에 있는지 확인해서 exUser에 담는다. (없으면 null)

@@ -1,8 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+
 const postRouter = require('./routes/post');
 const userRouter = require('./routes/user');
 const db = require('./models');
+const passportConfig = require('./passport');
+
 const app = express();
 
 /* 
@@ -11,6 +14,7 @@ const app = express();
   - !!하나의 요청엔 하나의 응답
   - 시퀄라이즈 세팅 $ npx sequelize init
   - 스케일업 할 경우 서버를 쪼개서 두는게 좋다.
+  - acation.data(프론트엔드) === req.body(백엔드)
 
   get -> 가져오다
   post -> 생성하다 (애매하면 그냥 post 쓰기)
@@ -28,6 +32,8 @@ db.sequelize
     console.log('db 연결 성공');
   })
   .catch(console.error);
+
+passportConfig();
 
 // 상위에 적어야한다. 미들웨어 특성 상 요청한 데이터를 위에서 아래로 시작이 된다.
 app.use(
