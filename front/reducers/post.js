@@ -139,7 +139,7 @@ const reducer = (state = initialSate, action) => {
       case ADD_POST_SUCCESS:
         draft.addPostLoading = false;
         draft.addPostDone = true;
-        draft.mainPosts.unshift(dummyPost(action.data));
+        draft.mainPosts.unshift(action.data);
         break;
       case ADD_POST_FAILURE:
         draft.addPostLoading = false;
@@ -172,10 +172,10 @@ const reducer = (state = initialSate, action) => {
       case ADD_COMMENT_SUCCESS: {
         // 1. 게시글 id 찾기
         const post = draft.mainPosts.find(
-          (value) => value.id === action.data.postId
+          (value) => value.id === action.data.PostId // post router에서 대문자로 PostId를 작성했기 때문에 똑같이 대문자로 작성
         );
         // 2. 그 게시글에 댓글 추가
-        post.Comments.unshift(dummyComment(action.data.content));
+        post.Comments.unshift(action.data);
 
         draft.addCommentLoading = false;
         draft.addCommentDone = true;
