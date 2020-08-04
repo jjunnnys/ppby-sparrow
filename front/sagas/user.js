@@ -70,6 +70,7 @@ function* logIn(action) {
       data: result.data, // 서버로부터 사용자 정보 받아 온다.
     });
   } catch (error) {
+    console.error(error);
     yield put({
       type: LOG_IN_FAILURE,
       error: error.response.data,
@@ -103,8 +104,7 @@ const signUpAPI = (data) => {
 
 function* signUp(action) {
   try {
-    const result = yield call(signUpAPI, action.data);
-    console.log(result);
+    yield call(signUpAPI, action.data);
     yield put({
       type: SIGN_UP_SUCCESS,
     });

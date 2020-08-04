@@ -63,7 +63,7 @@ const Signup = () => {
     if (!term) {
       return setTermError(true);
     }
-    console.log(`서버로 보내는 데이터 ${email} ${password} ${nickname}`);
+
     dispatch({
       type: SIGN_UP_REQUEST,
       data: { email, password, nickname },

@@ -23,6 +23,7 @@ const router = express.Router();
   - 하지만 편하게 미들웨어로 처리
 */
 
+/* 로그인 */
 // 로그인은 메소드가 애매하니까 post로 만든다.
 router.post('/login', (req, res, next) => {
   // 이렇게 하면 미들웨어를 확장 (express 기법)
@@ -35,19 +36,29 @@ router.post('/login', (req, res, next) => {
     if (info) {
       return res.status(401).send(info.reason); // 401: 허가되지 않음
     }
-    // passport 로그인
+    // passport에 로그인
     return req.login(user, async (loginErr) => {
       // 혹시나 passport에서 로그인할 때 에러날 수 있어서 만들어 준다.
       if (loginErr) {
         console.log(loginErr);
         return next(loginErr);
       }
-      return res.json(user); // 사용자 정보를 프론트로 넘긴다.
+      return res.status(200).json(user); // 쿠키랑 사용자 id를 프론트로 넘긴다.
       // loginErr가 없으면 서비스 로그인과 passport 로그인이 성공
     });
   })(req, res, next); // (req, res, next) 를 쓰기 위해 이렇게 작성
 }); // POST /user/login
 
+/* 로그아웃 */
+// 로그인 이후에는 req.user에 사용자 정보가 들어가 있음
+router.post('/user/logout', (req, res, next) => {
+  // 세션 지우고 쿠키 지우기
+  req.logOut();
+  req.session.destroy();
+  res.send('로그아웃 성공');
+});
+
+/* 회원가입 */
 // POST /user/
 router.post('/', async (req, res, next) => {
   try {
