@@ -126,7 +126,6 @@ const reducer = (state = initialSate, action) => {
         break;
       case LOG_IN_SUCCESS:
         draft.userInfo = action.data;
-        console.log(action.data);
         draft.logInLoading = false;
         draft.logInDone = true;
         break;

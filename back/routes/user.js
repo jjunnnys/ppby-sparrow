@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt'); // 패스워드 암호화 라이브러리
 const passport = require('passport');
 
-const { User } = require('../models');
+const { User, Post } = require('../models');
 
 const router = express.Router();
 
@@ -43,7 +43,29 @@ router.post('/login', (req, res, next) => {
         console.log(loginErr);
         return next(loginErr);
       }
-      return res.status(200).json(user); // 쿠키랑 사용자 id를 프론트로 넘긴다.
+
+      // 모든 정보를 집어 넣은 유저 (비밀번호는 빼고)
+      const fullUserWithoutPassword = await User.findOne({
+        where: { id: user.id },
+        // 필요한 필드만 가져오기
+        attributes: ['id', 'nickname'], // 제외 시키는 방법으론 exclude: [''] 이런 식으로 작성
+        include: [
+          // User 모델에서 가져오기 (다른 테이블과의 관계를 자동으로 합쳐준다.)
+          {
+            model: Post, // hasMany라서 'model: post' 가 복수형이 되어서 userInfo.Posts가 된다.
+          },
+          {
+            model: User,
+            as: 'Followings',
+          },
+          {
+            model: User,
+            as: 'Followers',
+          },
+        ],
+      });
+
+      return res.status(200).json(fullUserWithoutPassword); // 내가 원하는 데이터만 프론트로 넘긴다.(fullUserWithoutPassword)
       // loginErr가 없으면 서비스 로그인과 passport 로그인이 성공
     });
   })(req, res, next); // (req, res, next) 를 쓰기 위해 이렇게 작성
@@ -52,10 +74,14 @@ router.post('/login', (req, res, next) => {
 /* 로그아웃 */
 // 로그인 이후에는 req.user에 사용자 정보가 들어가 있음
 router.post('/user/logout', (req, res, next) => {
-  // 세션 지우고 쿠키 지우기
-  req.logOut();
-  req.session.destroy();
-  res.send('로그아웃 성공');
+  try {
+    // 세션 지우고 쿠키 지우기
+    req.logOut();
+    req.session.destroy();
+    res.send('로그아웃 성공');
+  } catch (error) {
+    next(error);
+  }
 });
 
 /* 회원가입 */

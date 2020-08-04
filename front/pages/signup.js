@@ -23,14 +23,21 @@ const Signup = () => {
   const [termError, setTermError] = useState(false);
 
   const dispatch = useDispatch();
-  const { signUpLoading, signUpDone, signUpError } = useSelector(
+  const { signUpLoading, signUpDone, signUpError, userInfo } = useSelector(
     (state) => state.user
   );
+
+  // 로그인 되었을 땐 회원가입 페이지에 들어가면 홈으로 리다이랙트
+  useEffect(() => {
+    if (userInfo && userInfo.id) {
+      Router.replace('/'); // 검색기록에 안 남음 (push는 검색 기록에 남음)
+    }
+  }, [userInfo && userInfo.id]);
 
   useEffect(() => {
     // 회원가입 완료되면 메인페이지로 이동, 프로필하고 비슷
     if (signUpDone) {
-      Router.push('/');
+      Router.replace('/');
     }
   }, [signUpDone]);
 
