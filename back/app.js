@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const postRouter = require('./routes/post');
 const userRouter = require('./routes/user');
 const db = require('./models');
@@ -28,8 +29,14 @@ db.sequelize
   })
   .catch(console.error);
 
-// 프론트에서 받아 온 데이터를 req.body어 넣기 위한 작업
 // 상위에 적어야한다. 미들웨어 특성 상 요청한 데이터를 위에서 아래로 시작이 된다.
+app.use(
+  // 실무에서는 요청을 보내는 도메인을 적어 줌
+  cors({
+    origin: true, // true 설정 시, * 대신 보낸 곳의 주소가 자동으로 들어가 편하다.
+  })
+);
+// 프론트에서 받아 온 데이터를 req.body어 넣기 위한 작업
 app.use(express.json()); // json 형태로 req.body에 담는다.
 app.use(express.urlencoded({ extended: true })); // form submit 데이터를 처리
 

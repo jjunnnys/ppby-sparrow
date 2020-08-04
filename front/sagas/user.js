@@ -111,6 +111,7 @@ function* signUp(action) {
       data: null,
     });
   } catch (error) {
+    // 서버에서 400번, 500번 대에 chatch로 온다.
     yield put({
       type: SIGN_UP_FAILURE,
       error: error.response.data,
