@@ -69,20 +69,6 @@ export const logoutRequestAction = () => {
   };
 };
 
-/* 더미 유저 데이터 함수 만들기 */
-
-// useInfo에 해당
-const dummyUser = (data) => ({
-  // data -> email, password
-  ...data,
-  nickname: '민준',
-  id: 1,
-  /* 시퀄라이즈에서 합쳐준다. 대문자로 */
-  Posts: [{ id: 1 }], // 내 가쓴 글
-  Followings: [], // 내가 팔로우한 사람
-  Followers: [], // 나를 팔로우한 사람
-});
-
 const reducer = (state = initialSate, action) => {
   return produce(state, (draft) => {
     switch (action.type) {
