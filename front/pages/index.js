@@ -8,6 +8,7 @@ import AppLayout from '../components/AppLayout';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
 import { LOAD_POSTS_REQUEST } from '../reducers/post';
+import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,12 @@ const Home = () => {
     (state) => state.post
   );
 
+  // 페이지 접속할 때 사용자 정보와 게시글 불러 옴 (전체 정보를 채워서 준다.)
   useEffect(() => {
+    dispatch({
+      // 매번 로그인 상태 복구해 주기 위해서
+      type: LOAD_MY_INFO_REQUEST,
+    });
     dispatch({
       type: LOAD_POSTS_REQUEST,
     });
