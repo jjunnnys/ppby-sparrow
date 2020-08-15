@@ -7,6 +7,51 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
+// 사용자 정보 복구(새로고침을 하면 이 요청이 간다. 단, 로그아웃된 상태여도 요청이 가서 수정)
+router.get('/', async (req, res, next) => {
+  // GET /user
+  try {
+    if (req.user) {
+      // 짧은 정보만 불러오면 에러가 생김
+      // const user = await User.findOne({
+      //   where: { id: req.user.id }, -> 로그아웃 상태이면 여기서 에러가 발생함 확실하게 if로 확인
+      // });
+
+      /* 모든 정보를 집어 넣은 유저 (비밀번호는 빼고) */
+      const fullUserWithoutPassword = await User.findOne({
+        where: { id: req.user.id },
+        // 필요한 필드만 가져오기
+        attributes: {
+          exclude: ['password'],
+        },
+        include: [
+          // User 모델에서 가져오기 (다른 테이블과의 관계를 자동으로 합쳐준다.)
+          {
+            model: Post, // hasMany라서 'model: post' 가 복수형이 되어서 userInfo.Posts가 된다.
+            attributes: ['id'], // 필요 없는 데이터는 안 가져오게 id만 가지고 숫자를 센다.
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id'],
+          },
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id'],
+          },
+        ],
+      });
+      res.status(200).json(fullUserWithoutPassword);
+    } else {
+      res.status(200).json(null); // 없다면 아무것도 안보내주면 된다.
+    }
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
 /*
   요청/응답은 헤더(상태, 용량, 시간, 쿠키) 와 바디(데이터)로 구성
   200 성공
@@ -36,6 +81,8 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
     }
     if (info) {
       return res.status(401).send(info.reason); // 401: 허가되지 않음
+      /* 쿠키가 전달이 돼야만 백엔드에서 어떤 사람이 요청을 보냈는지 알 수 있다, */
+      /* 여기서 문제 점 백엔드와 프론트엔드의 서버가 다르면 쿠키가 전달이 안됨, 그래서 로그인을 했는데도 401 Unauthorized 에러가 뜬다. */
     }
     // passport에 로그인
     return req.login(user, async (loginErr) => {
@@ -54,14 +101,17 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
           // User 모델에서 가져오기 (다른 테이블과의 관계를 자동으로 합쳐준다.)
           {
             model: Post, // hasMany라서 'model: post' 가 복수형이 되어서 userInfo.Posts가 된다.
+            attributes: ['id'],
           },
           {
             model: User,
             as: 'Followings',
+            attributes: ['id'],
           },
           {
             model: User,
             as: 'Followers',
+            attributes: ['id'],
           },
         ],
       });

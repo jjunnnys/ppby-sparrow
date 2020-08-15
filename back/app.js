@@ -45,7 +45,8 @@ passportConfig();
 app.use(
   // 실무에서는 요청을 보내는 도메인을 적어 줌
   cors({
-    origin: true, // true 설정 시, * 대신 보낸 곳의 주소가 자동으로 들어가 편하다.
+    origin: true, // true 설정 시, * 대신 보낸 곳의 주소가 자동으로 들어가 편하다. ACCESS_CONTROL_ALLOW_ORIGIN : ture
+    credentials: true, // 쿠키도 같이 전달됨, ACCESS_CONTROL_ALLOW_credentials : ture
   })
 );
 // 프론트에서 받아 온 데이터를 req.body어 넣기 위한 작업
@@ -63,7 +64,7 @@ app.use(express.urlencoded({ extended: true })); // form submit 데이터를 처
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(
   session({
-    saveUninitialized: false, // saveUninitialized, resave 는 거의 false 사용
+    saveUninitialized: false, // saveUninitialized, resave 는 거의 false 사용,
     resave: false,
     /*
     쿠키에 랜덤한 문자열을 보내 주는데 이건 이 서비스의 데이터에 기반하여 만들어진 문자열

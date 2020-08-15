@@ -4,6 +4,9 @@ export const initialSate = {
   userInfo: null,
   signUpdate: {},
   loginData: {},
+  loadMyInfoLoading: false, // 유저 정보 가져오기 시도 중
+  loadMyInfoDone: false,
+  loadMyInfoError: null,
   logInLoading: false, // 로그인 시도 중
   logInDone: false,
   logInError: null,
@@ -25,6 +28,10 @@ export const initialSate = {
 };
 
 /* 액션 */
+
+export const LOAD_MY_INFO_REQUEST = 'LOAD_MY_INFO_REQUEST';
+export const LOAD_MY_INFO_SUCCESS = 'LOAD_MY_INFO_SUCCESS';
+export const LOAD_MY_INFO_FAILURE = 'LOAD_MY_INFO_FAILURE';
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
@@ -72,6 +79,21 @@ export const logoutRequestAction = () => {
 const reducer = (state = initialSate, action) => {
   return produce(state, (draft) => {
     switch (action.type) {
+      /* 유저 정보 가져오기 */
+      case LOAD_MY_INFO_REQUEST:
+        draft.loadMyInfoLoading = true;
+        draft.loadMyInfoDone = false;
+        draft.loadMyInfoError = null;
+        break;
+      case LOAD_MY_INFO_SUCCESS:
+        draft.userInfo = action.data; // 실제 로그인이 됐으면 action.data에 유저 정보가 들어 있음
+        draft.loadMyInfoLoading = false;
+        draft.loadMyInfoDone = true;
+        break;
+      case LOAD_MY_INFO_FAILURE:
+        draft.loadMyInfoLoading = false;
+        draft.loadMyInfoDone = action.error;
+        break;
       /* 팔로우 */
       case FOLLOW_REQUEST:
         draft.followLoading = true;

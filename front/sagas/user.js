@@ -16,7 +16,30 @@ import {
   FOLLOW_SUCCESS,
   UNFOLLOW_SUCCESS,
   UNFOLLOW_FAILURE,
+  LOAD_MY_INFO_REQUEST,
+  LOAD_MY_INFO_SUCCESS,
+  LOAD_MY_INFO_FAILURE,
 } from '../reducers/user';
+
+const loadMyInfoAPI = () => {
+  return axios.get('/user'); // get 하고 delete는 data가 없어서 두번째 자리가 {쿠키전달} 이다.
+};
+// 더 깔끔하게 서버에서 로드될 때부터 정보를 가져오려면 ssr이 필요하다.
+function* loadMyInfo(action) {
+  try {
+    const result = yield call(loadMyInfoAPI, action.data);
+    yield delay(1000);
+    yield put({
+      type: LOAD_MY_INFO_SUCCESS,
+      data: result.data,
+    });
+  } catch (error) {
+    yield put({
+      type: LOAD_MY_INFO_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
 
 const followAPI = () => {
   return axios.post('/api/follow');
@@ -114,6 +137,9 @@ function* signUp(action) {
     });
   }
 }
+function* watchLoadMyInfo() {
+  yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
+}
 
 function* watchFollow() {
   yield takeLatest(FOLLOW_REQUEST, follow);
@@ -137,6 +163,7 @@ function* watchSignUp() {
 
 export default function* userSaga() {
   yield all([
+    fork(watchLoadMyInfo),
     fork(watchFollow),
     fork(watchUnfollow),
     fork(watchLogIn),

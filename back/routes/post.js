@@ -1,7 +1,8 @@
 const { Router } = require('express');
 
-const { Post, Comment } = require('../models');
+const { Post, Comment, Image, User } = require('../models');
 const { isLoggedIn } = require('./middlewares');
+const db = require('../models');
 
 const router = Router();
 
@@ -13,7 +14,22 @@ router.post('/', isLoggedIn, async (req, res, next) => {
       content: req.body.content, // 이름을 잘 맞춰 줘야 한다.
       UserId: req.user.id, // deserialize를 통해 req.user가 생성
     });
-    res.status(201).json(post); // 잘 생성 되고 프론트에 돌려 줌
+    // 정보 완성하기
+    const fullPost = await Post.findOne({
+      where: { id: post.id }, // 방금 등록한 post.id 가져오고
+      include: [
+        {
+          model: Image, // 이미지
+        },
+        {
+          model: Comment, // 댓글
+        },
+        {
+          model: User, // 작성자
+        },
+      ],
+    });
+    res.status(201).json(fullPost); // 잘 생성 되고(모든 참조하는 데이터 넣은 다음) 프론트에 돌려 줌
   } catch (error) {
     console.error(error);
     next(error);
