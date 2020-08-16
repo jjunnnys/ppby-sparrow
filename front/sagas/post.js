@@ -115,20 +115,19 @@ function* addPost(action) {
 }
 
 const removePostAPI = (data) => {
-  return axios.post('/api/post', data);
+  return axios.delete(`/post/${data}`); // delete는 데이터를 못 넣는다.
 };
 
 function* removePost(action) {
   try {
-    // const result = yield call(removePostAPI, action.data);
-    yield delay(1000);
+    const result = yield call(removePostAPI, action.data);
     yield put({
       type: REMOVE_POST_SUCCESS,
-      data: action.data, // id 가 들어 있음
+      data: result.data, // PostId 가 들어 있음
     });
     yield put({
       type: REMOVE_POST_OF_USER_INFO,
-      data: action.data, // id 가 들어 있음
+      data: action.data,
     });
   } catch (error) {
     yield put({

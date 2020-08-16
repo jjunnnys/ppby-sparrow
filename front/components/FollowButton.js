@@ -31,6 +31,12 @@ const FollowButton = ({ post }) => {
       });
     }
   }, [isFollowing]);
+
+  // 내 게시글에는 팔로우 버튼 안 뜨게하기 (hooks 보다는 아래에 적어 준다.)
+  if (post.User.id === userInfo.id) {
+    return null;
+  }
+
   return (
     <Button
       // loading -> 둘 중 하나라도 true면 로딩이 된다.

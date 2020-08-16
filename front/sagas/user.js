@@ -19,7 +19,30 @@ import {
   LOAD_MY_INFO_REQUEST,
   LOAD_MY_INFO_SUCCESS,
   LOAD_MY_INFO_FAILURE,
+  CHANGE_NICKNAME_REQUEST,
+  CHANGE_NICKNAME_SUCCESS,
+  CHANGE_NICKNAME_FAILURE,
 } from '../reducers/user';
+
+const changeNicknameAPI = (data) => {
+  return axios.patch('/user/nickname', { nickname: data });
+};
+
+function* changeNickname(action) {
+  try {
+    const result = yield call(changeNicknameAPI, action.data);
+    yield delay(1000);
+    yield put({
+      type: CHANGE_NICKNAME_SUCCESS,
+      data: result.data,
+    });
+  } catch (error) {
+    yield put({
+      type: CHANGE_NICKNAME_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
 
 const loadMyInfoAPI = () => {
   return axios.get('/user'); // get 하고 delete는 data가 없어서 두번째 자리가 {쿠키전달} 이다.
@@ -137,6 +160,11 @@ function* signUp(action) {
     });
   }
 }
+
+function* watchChangeNickname() {
+  yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
+}
+
 function* watchLoadMyInfo() {
   yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
 }
@@ -163,6 +191,7 @@ function* watchSignUp() {
 
 export default function* userSaga() {
   yield all([
+    fork(watchChangeNickname),
     fork(watchLoadMyInfo),
     fork(watchFollow),
     fork(watchUnfollow),

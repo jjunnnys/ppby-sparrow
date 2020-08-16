@@ -53,9 +53,9 @@ export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 
-export const CHANGE_NICKNAME_REQUEST = 'UNFOLLOW_REQUEST';
-export const CHANGE_NICKNAME_SUCCESS = 'UNFOLLOW_SUCCESS';
-export const CHANGE_NICKNAME_FAILURE = 'UNFOLLOW_FAILURE';
+export const CHANGE_NICKNAME_REQUEST = 'CHANGE_NICKNAME_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'CHANGE_NICKNAME_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'CHANGE_NICKNAME_FAILURE';
 
 // 리듀셔는 액션을 통해서 상태를 바꿀 수 있기 떄문에 post 관련 액션을 만든다.
 export const ADD_POST_TO_USER_INFO = 'ADD_POST_TO_USER_INFO';
@@ -177,6 +177,7 @@ const reducer = (state = initialSate, action) => {
         draft.changeNicknameError = null;
         break;
       case CHANGE_NICKNAME_SUCCESS:
+        draft.userInfo.nickname = action.data.nickname;
         draft.changeNicknameLoading = false;
         draft.changeNicknameDone = true;
         break;
@@ -184,11 +185,11 @@ const reducer = (state = initialSate, action) => {
         draft.changeNicknameLoading = false;
         draft.changeNicknameError = action.error;
         break;
-      /* 게시글 작성 수 추가 */
+      /* 게시글 작성 후 추가 */
       case ADD_POST_TO_USER_INFO:
         draft.userInfo.Posts.unshift({ id: action.data });
         break;
-      /* 게시글 작성 수 삭제 */
+      /* 게시글 삭제 후 추가 */
       case REMOVE_POST_OF_USER_INFO:
         draft.userInfo.Posts = draft.userInfo.Posts.filter(
           (value) => value.id !== action.data

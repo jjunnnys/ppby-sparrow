@@ -123,7 +123,6 @@ const reducer = (state = initialSate, action) => {
       case LOAD_POSTS_SUCCESS:
         draft.loadPostsLoading = false;
         draft.loadPostsDone = true;
-        // 10개 씩 포스터 불러오기, action.data의 기존 데이터에 draft.mainPosts 데이터 넣기
         draft.mainPosts = action.data.concat(draft.mainPosts);
         // 포스트 불러오기 제한 하기
         draft.hasMorePosts = draft.mainPosts.length < 50; // 일단 50개 까지 임의로 설정, 50이 되면 false가 되서 포스트를 더 이상 안가져 온다.
@@ -156,9 +155,8 @@ const reducer = (state = initialSate, action) => {
       case REMOVE_POST_SUCCESS:
         draft.removePostLoading = false;
         draft.removePostDone = true;
-        // 지울때만 filter를 사용해서 편하게 함 (아니면 splice를 써야함)
         draft.mainPosts = draft.mainPosts.filter(
-          (value) => value.id !== action.data
+          (value) => value.id !== action.data.PostId
         );
         break;
       case REMOVE_POST_FAILURE:

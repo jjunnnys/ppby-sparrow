@@ -83,7 +83,7 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
 });
 
 // PATCH /post/1/like
-router.patch('/:postId/like', async (req, res, next) => {
+router.patch('/:postId/like', isLoggedIn, async (req, res, next) => {
   // !! 항상 데이터먼저 검사하기
   try {
     const post = await Post.findOne({ where: { id: req.params.postId } });
@@ -99,7 +99,7 @@ router.patch('/:postId/like', async (req, res, next) => {
 });
 
 // DELETE /post/1/like
-router.delete('/:postId/like', async (req, res, next) => {
+router.delete('/:postId/like', isLoggedIn, async (req, res, next) => {
   try {
     const post = await Post.findOne({ where: { id: req.params.postId } });
     if (!post) {
@@ -113,8 +113,22 @@ router.delete('/:postId/like', async (req, res, next) => {
   }
 });
 
-// DELETE /post
-router.delete('/', (req, res) => {
+// DELETE /post/10
+router.delete('/:postId', isLoggedIn, async (req, res, next) => {
+  try {
+    // 시퀄라이즈에서는 제거할 때 destroy를 쓴다.
+    await Post.destroy({
+      where: {
+        id: req.params.postId,
+        // postId만 바꾸면 게시글을 삭제할 수 있으므로 보안 강화 (작성하고 삭제하는 건 보안 철저히)
+        UserId: req.user.id, // 게시글의 userId
+      },
+    });
+    res.status(200).json({ PostId: parseInt(req.params.postId, 10) }); // parmas는 문자열이라서 id는 숫자이기 떄문에 바꿔준다.
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
   res.json({ id: 1 });
 });
 
