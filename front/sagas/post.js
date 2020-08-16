@@ -8,7 +8,6 @@ import {
   call,
 } from 'redux-saga/effects';
 import axios from 'axios';
-import shortid from 'shortid';
 import {
   ADD_POST_SUCCESS,
   ADD_POST_FAILURE,
@@ -22,24 +21,22 @@ import {
   LOAD_POSTS_REQUEST,
   LOAD_POSTS_SUCCESS,
   LOAD_POSTS_FAILURE,
-  generateDummyPost,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
   REMOVE_POST_OF_USER_INFO,
 } from '../reducers/user';
 
-const loadPostsAPI = () => {
-  return axios.get('/api/posts');
+const loadPostsAPI = (data) => {
+  return axios.get('/posts', data);
 };
 
 function* loadPosts(action) {
   try {
-    // const result = yield call(loadPostsAPI, action.data);
-    yield delay(1000);
+    const result = yield call(loadPostsAPI, action.data);
     yield put({
       type: LOAD_POSTS_SUCCESS,
-      data: generateDummyPost(10),
+      data: result.data, // 게시글들의 배열이 들어 있음
     });
   } catch (error) {
     yield put({
@@ -108,6 +105,7 @@ function* addComment(action) {
       data: result.data,
     });
   } catch (error) {
+    console.log(error);
     yield put({
       type: ADD_COMMENT_FAILURE,
       data: error.response.data,

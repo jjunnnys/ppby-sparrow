@@ -23,9 +23,16 @@ router.post('/', isLoggedIn, async (req, res, next) => {
         },
         {
           model: Comment, // 댓글
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+            },
+          ],
         },
         {
           model: User, // 작성자
+          attributes: ['id', 'nickname'],
         },
       ],
     });
@@ -49,10 +56,21 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
 
     const comment = await Comment.create({
       content: req.body.content,
-      PostId: req.params.postId, // 주소에 들어가는 파라미터 (좀 더 자세하게 적기 위해 req.body 말고 req.params로 적는다.)
+      PostId: parseInt(req.params.postId, 10), // params에 들어가기 때문에 문자열이 들어가서 오류 발생, 숫자로 바꾼다.
       UserId: req.user.id,
     });
-    res.status(201).json(comment); // 잘 생성 되고 프론트에 돌려 줌
+
+    // 댓글의 모든 정보를 담아서 보내준다.
+    const fullComment = await Comment.findOne({
+      where: { id: comment.id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'nickname'],
+        },
+      ],
+    });
+    res.status(201).json(fullComment); // 잘 생성 되고 프론트에 돌려 줌
   } catch (error) {
     console.error(error);
     next(error);

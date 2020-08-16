@@ -107,12 +107,12 @@ const PostCard = ({ post }) => {
           <List
             header={`${post.Comments.length}개의 댓글`}
             itemLayout="horizontal"
-            dataSource={post.Comments} // Comments 배열의 각각의 인덱스가 item으로 들어감
+            dataSource={post.Comments} // Comments 배열의 각각의 인덱스가 item으로 들어감 (DB에서 넘어오는 데이터는 다 대문자로 시작)
             renderItem={(item) => (
               <li>
                 <Comment
-                  author={item.user.nickname}
-                  avatar={<Avatar>{item.user.nickname[0]}</Avatar>} // 동그라미에 첫번 째 글자만 나옴
+                  author={item.User.nickname}
+                  avatar={<Avatar>{item.User.nickname[0]}</Avatar>} // 동그라미에 첫번 째 글자만 나옴
                   content={item.content}
                 />
               </li>
@@ -130,7 +130,7 @@ PostCard.prototype = {
     id: PropTypes.number,
     User: PropTypes.object,
     content: PropTypes.string,
-    createdAt: PropTypes.object,
+    createdAt: PropTypes.string,
     Comments: PropTypes.arrayOf(PropTypes.object),
     Images: PropTypes.arrayOf(PropTypes.object),
   }).isRequired,

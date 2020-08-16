@@ -1,6 +1,4 @@
-import shortId from 'shortid';
 import prodece from 'immer';
-import faker from 'faker';
 
 export const initialSate = {
   mainPosts: [],
@@ -25,35 +23,6 @@ export const initialSate = {
   - 무한 스크롤링 -> 스크롤을 다 하면 10개 불러오고 다 하면 10개 불러오고 
   - saga에서 10개씩 불러오게 설정한다.
 */
-
-// saga 에서 쓰기 위해 export
-export const generateDummyPost = (number) =>
-  Array(number)
-    .fill()
-    .map(() => ({
-      id: shortId.generate(),
-      User: {
-        id: shortId.generate(),
-        nickname: faker.name.findName(),
-      },
-      content: faker.lorem.paragraph(),
-      Images: [
-        {
-          id: shortId.generate(),
-          src: faker.image.image(),
-        },
-      ],
-      Comments: [
-        {
-          id: shortId.generate(),
-          user: {
-            id: shortId.generate(),
-            nickname: faker.name.findName(),
-          },
-          content: faker.lorem.sentences(),
-        },
-      ],
-    }));
 
 /* 액션 */
 
@@ -83,27 +52,6 @@ export const addPost = (data) => ({
 export const addComment = (data) => ({
   type: ADD_COMMENT_REQUEST,
   data,
-});
-
-// 리듀서가 분리되어 있다. (user와 post)
-const dummyPost = ({ id, content }) => ({
-  id, // id를 정하기 애매할 떄 사용
-  content,
-  User: {
-    id: 1,
-    nickname: 'ppby',
-  },
-  Images: [],
-  Comments: [],
-});
-
-const dummyComment = (data) => ({
-  id: shortId.generate(), // id를 정하기 애매할 떄 사용
-  content: data,
-  user: {
-    id: 1,
-    nickname: 'ppby',
-  },
 });
 
 /* 리듀서란? 이전 상태를 액션을 통해 다음 상태로 만들어내는 함수(불변성 유지) */

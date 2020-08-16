@@ -29,32 +29,33 @@ const Home = () => {
     });
   }, []);
 
-  useEffect(() => {
-    // 스크롤 현재 위치 파악
-    const onScroll = () => {
-      // 많이 쓰는 스크롤 위치 파악하는 함수
-      // console.log(
-      //   `얼마나 내렸는지(화면 위에 기준) :${window.scrollY} | 화면에 보이는 길이 :${document.documentElement.clientHeight} | 총 길이 :${document.documentElement.scrollHeight}`
-      // );
+  // useEffect(() => {
+  //   // 스크롤 현재 위치 파악
+  //   const onScroll = () => {
+  //     // 많이 쓰는 스크롤 위치 파악하는 함수
+  //     // console.log(
+  //     // eslint-disable-next-line max-len
+  //     //   `얼마나 내렸는지(화면 위에 기준) :${window.scrollY} | 화면에 보이는 길이 :${document.documentElement.clientHeight} | 총 길이 :${document.documentElement.scrollHeight}`
+  //     // );
 
-      // 화면 끝에서 300px 위에서 데이터 불러오기
-      if (
-        window.scrollY + document.documentElement.clientHeight >
-        document.documentElement.scrollHeight - 300
-      ) {
-        // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
-        if (hasMorePosts && !loadPostsLoading) {
-          dispatch({
-            type: LOAD_POSTS_REQUEST,
-          });
-        }
-      }
-    };
-    window.addEventListener('scroll', onScroll); // 주의 클린업 함수로 window를 제거 해야함
-    return () => {
-      window.removeEventListener('scroll', onScroll); // 이 작업을 안하면 메모리에 계속 쌓여있는다.
-    };
-  }, [hasMorePosts, loadPostsLoading]);
+  //     // 화면 끝에서 300px 위에서 데이터 불러오기
+  //     if (
+  //       window.scrollY + document.documentElement.clientHeight >
+  //       document.documentElement.scrollHeight - 300
+  //     ) {
+  //       // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
+  //       if (hasMorePosts && !loadPostsLoading) {
+  //         dispatch({
+  //           type: LOAD_POSTS_REQUEST,
+  //         });
+  //       }
+  //     }
+  //   };
+  //   window.addEventListener('scroll', onScroll); // 주의 클린업 함수로 window를 제거 해야함
+  //   return () => {
+  //     window.removeEventListener('scroll', onScroll); // 이 작업을 안하면 메모리에 계속 쌓여있는다.
+  //   };
+  // }, [hasMorePosts, loadPostsLoading]);
 
   return (
     <AppLayout>
