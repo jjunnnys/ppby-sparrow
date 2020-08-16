@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     db.User.hasMany(db.Post);
     db.User.hasMany(db.Comment);
     // N:M
-    db.User.belongsToMany(db.Post, { through: 'Like', as: 'Likers' }); // 게시글과 좋아요 관계, 중간 테이블명을 정해 줄 수 있음 {through: 'Like'}
+    db.User.belongsToMany(db.Post, { through: 'Like', as: 'Liked' }); // 게시글과 좋아요 관계, 중간 테이블명을 정해 줄 수 있음 {through: 'Like'}
     // as 로 별칭을 붙힌다.
     // 나중에 as에 따라서 post.getLikers 처럼 게시글 좋아요 누른 사람을 가져오게 된다. (포스트에 좋아요를 누른 사람들)
     db.User.belongsToMany(db.User, {

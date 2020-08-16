@@ -4,6 +4,12 @@ export const initialSate = {
   mainPosts: [],
   imagePaths: [],
   hasMorePosts: true, // 처음 게시물이 0개일 때는 포스트를 가져오는 시도를 해야함
+  likePostLoading: false,
+  likePostDone: false,
+  likePostError: null,
+  unlikePostLoading: false,
+  unlikePostDone: false,
+  unlikePostError: null,
   loadPostsLoading: false,
   loadPostsDone: false,
   loadPostsError: null,
@@ -25,6 +31,14 @@ export const initialSate = {
 */
 
 /* 액션 */
+
+export const LIKE_POST_REQUEST = 'LIKE_POST_REQUEST';
+export const LIKE_POST_SUCCESS = 'LIKE_POST_SUCCESS';
+export const LIKE_POST_FAILURE = 'LIKE_POST_FAILURE';
+
+export const UNLIKE_POST_REQUEST = 'UNLIKE_POST_REQUEST';
+export const UNLIKE_POST_SUCCESS = 'UNLIKE_POST_SUCCESS';
+export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
 
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
@@ -60,6 +74,46 @@ const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
   return prodece(state, (draft) => {
     switch (action.type) {
+      /* 좋아요 */
+      case LIKE_POST_REQUEST:
+        draft.likePostLoading = true;
+        draft.likePostDone = false;
+        draft.likePostError = null;
+        break;
+      case LIKE_POST_SUCCESS: {
+        const post = draft.mainPosts.find(
+          (value) => value.id === action.data.PostId
+        );
+        post.Likers.push({ id: action.data.UserId });
+        draft.likePostLoading = false;
+        draft.likePostDone = true;
+        break;
+      }
+      case LIKE_POST_FAILURE:
+        draft.likePostLoading = false;
+        draft.likePostError = action.error;
+        break;
+      /* 좋아요 취소 추가 */
+      case UNLIKE_POST_REQUEST:
+        draft.unlikePostLoading = true;
+        draft.unlikePostDone = false;
+        draft.unlikePostError = null;
+        break;
+      case UNLIKE_POST_SUCCESS: {
+        const post = draft.mainPosts.find(
+          (value) => value.id === action.data.PostId
+        );
+        post.Likers = post.Likers.filter(
+          (value) => value.id !== action.data.UserId
+        );
+        draft.unlikePostLoading = false;
+        draft.unlikePostDone = true;
+        break;
+      }
+      case UNLIKE_POST_FAILURE:
+        draft.unlikePostLoading = false;
+        draft.unlikePostError = action.error;
+        break;
       /* 로딩 포스트 추가 */
       case LOAD_POSTS_REQUEST:
         draft.loadPostsLoading = true;

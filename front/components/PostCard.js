@@ -17,19 +17,32 @@ import {
 import PostImages from './PostImages';
 import CommentForm from './CommentForm';
 import PostCardContent from './PostCardContent';
-import { REMOVE_POST_REQUEST } from '../reducers/post';
+import {
+  REMOVE_POST_REQUEST,
+  LIKE_POST_REQUEST,
+  UNLIKE_POST_REQUEST,
+} from '../reducers/post';
 import FollowButton from './FollowButton';
 
 const PostCard = ({ post }) => {
-  const [liked, setLiked] = useState(false);
   const [commentFormOpend, setCommentFormOpend] = useState(false);
   const dispatch = useDispatch();
   const { removePostLoading } = useSelector((state) => state.post);
   const { userInfo } = useSelector((state) => state.user);
 
-  const onToggleLike = useCallback(() => {
-    // 토글 이벤트에선 항상 (prev)=>!prev (이전 데이터의 반대 값을 리턴)
-    setLiked((prev) => !prev);
+  const onLike = useCallback(() => {
+    dispatch({
+      type: LIKE_POST_REQUEST,
+      data: post.id, // 게시글 id
+      // 사용자 id는 담을 필요가 없다.
+    });
+  }, []);
+
+  const onUnlike = useCallback(() => {
+    dispatch({
+      type: UNLIKE_POST_REQUEST,
+      data: post.id, // 게시글 id
+    });
   }, []);
 
   const onToggleComment = useCallback(() => {
@@ -43,10 +56,10 @@ const PostCard = ({ post }) => {
     });
   }, [post]);
 
-  // 새로운 문법 ( userInfo && userInfo.id ) 와 동일 -> optional chaining
+  // const { id } = useSelector((state) => state.user.userInfo?.id);
   const id = userInfo?.id;
-  // 더 간단하게
-  //   const { id } = useSelector((state) => state.user.userInfo?.id);
+  const liked = post.Likers.find((v) => v.id === id); // 게시글에 좋아요를 누른 사람 중에 내가 있는지 확인
+
   return (
     <div style={{ marginTop: '20px' }}>
       <Card
@@ -59,10 +72,10 @@ const PostCard = ({ post }) => {
             <HeartTwoTone
               twoToneColor="#eb2f96"
               key="heart"
-              onClick={onToggleLike}
+              onClick={onUnlike}
             />
           ) : (
-            <HeartOutlined key="heart" onClick={onToggleLike} />
+            <HeartOutlined key="heart" onClick={onLike} />
           ),
           <MessageOutlined key="comment" onClick={onToggleComment} />,
           // ... 에 커서를 올렸을 떄 툴팁 박스 나옴
@@ -133,6 +146,7 @@ PostCard.prototype = {
     createdAt: PropTypes.string,
     Comments: PropTypes.arrayOf(PropTypes.object),
     Images: PropTypes.arrayOf(PropTypes.object),
+    Likers: PropTypes.arrayOf(PropTypes.object),
   }).isRequired,
 };
 

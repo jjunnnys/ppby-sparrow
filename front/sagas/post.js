@@ -21,11 +21,56 @@ import {
   LOAD_POSTS_REQUEST,
   LOAD_POSTS_SUCCESS,
   LOAD_POSTS_FAILURE,
+  LIKE_POST_REQUEST,
+  UNLIKE_POST_REQUEST,
+  LIKE_POST_SUCCESS,
+  LIKE_POST_FAILURE,
+  UNLIKE_POST_SUCCESS,
+  UNLIKE_POST_FAILURE,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
   REMOVE_POST_OF_USER_INFO,
 } from '../reducers/user';
+
+const likePostAPI = (data) => {
+  // data 는 postId
+  return axios.patch(`/post/${data}/like`); // 게시글에 일부분을 수정하기 떄문에 patch
+};
+
+function* likePost(action) {
+  try {
+    const result = yield call(likePostAPI, action.data);
+    yield put({
+      type: LIKE_POST_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    yield put({
+      type: LIKE_POST_FAILURE,
+      data: error.response.data,
+    });
+  }
+}
+
+const unlikePostAPI = (data) => {
+  return axios.delete(`/post/${data}/like`); // 최대한 요청, 응답을 가볍게 만들기 위해 두번 쨰 파라미터(data)는 제외(넣어도 되긴 함)
+};
+
+function* unlikePost(action) {
+  try {
+    const result = yield call(unlikePostAPI, action.data);
+    yield put({
+      type: UNLIKE_POST_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    yield put({
+      type: UNLIKE_POST_FAILURE,
+      data: error.response.data,
+    });
+  }
+}
 
 const loadPostsAPI = (data) => {
   return axios.get('/posts', data);
@@ -122,6 +167,14 @@ function* watchLoadPosts() {
   /* 메모리 절약을 위한 -> react-virtualized 사용 */
 }
 
+function* watchLikePost() {
+  yield takeLatest(LIKE_POST_REQUEST, likePost);
+}
+
+function* watchUnlikePost() {
+  yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
+}
+
 function* watchAddPost() {
   yield takeLatest(ADD_POST_REQUEST, addPost);
 }
@@ -136,6 +189,8 @@ function* watchAddComment() {
 
 export default function* postSaga() {
   yield all([
+    fork(watchLikePost),
+    fork(watchUnlikePost),
     fork(watchLoadPosts),
     fork(watchAddPost),
     fork(watchRemovePost),
