@@ -63,6 +63,8 @@ export const ADD_COMMENT_REQUEST = 'ADD_COMMENT_REQUEST';
 export const ADD_COMMENT_SUCCESS = 'ADD_COMMENT_SUCCESS';
 export const ADD_COMMENT_FAILURE = 'ADD_COMMENT_FAILURE';
 
+export const REMOVE_IMAGE = 'REMOVE_IMAGE'; // 동기액션
+
 /* 동적 액션 생성함수 */
 
 export const addPost = (data) => ({
@@ -81,6 +83,12 @@ const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
   return prodece(state, (draft) => {
     switch (action.type) {
+      /* 이미지 제거 (프론트에서만 지운다, 이미지는 서버 쪽에서 잘 안지운다. 머신러닝 등...) */
+      case REMOVE_IMAGE:
+        draft.imagePaths = draft.imagePaths.filter(
+          (v, index) => index !== action.data
+        );
+        break;
       /* 이미지 업로드 */
       case UPLOAD_IMAGES_REQUEST:
         draft.uploadImagesLoading = true;
@@ -164,6 +172,7 @@ const reducer = (state = initialSate, action) => {
         draft.addPostLoading = false;
         draft.addPostDone = true;
         draft.mainPosts.unshift(action.data);
+        draft.imagePaths = []; // 게시글 작성란이 비워짐
         break;
       case ADD_POST_FAILURE:
         draft.addPostLoading = false;

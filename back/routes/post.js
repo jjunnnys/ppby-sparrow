@@ -17,20 +17,60 @@ try {
   fs.mkdirSync('uploads');
 }
 
-router.post('/', isLoggedIn, async (req, res, next) => {
-  // POST /post
+// multer는 라우터마다 별도의 세팅을 해주는 것이 좋다. (게시글마다 폼 전송이 다 다르기 떄문에)
+const upload = multer({
+  // 저장할 곳 (일단 클라우드 연결 전엔 하드웨어에 저장, s3 서비스)
+  storage: multer.diskStorage({
+    destination(req, file, done) {
+      done(null, 'uploads');
+    },
+    filename(req, file, done) {
+      // 노드에서는 파일명이 겹칠 때 이전 데이터에 덮어씌우기 떄문에 앞에 쓴 사람이 피해를 볼 수 있음
+      // 파일명 안 겹치게 만든다.
+      // 파일명 뒤에 업로드 시간을 붙혀 줌(1ms 단위)
+      // ppby.png
+      const ext = path.extname(file.originalname); // 확장자 추출(.png)
+      const basename = path.basename(file.originalname, ext); // 이름 추출(ppby)
+      done(null, basename + '_' + new Date().getTime() + ext); // ppby312412412352.png
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB 로 제한
+  // !! 왠만하면 파일은 백엔드 서버를 거치지 않고 바로 클라우드로 전송하는 것이 좋다. (대규모일 경우)
+});
+
+/* 게시글 작성 */
+// POST /post
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
   try {
     // 프론트에서 생성한 게시글이 post 에 객체로 담긴다.
     const post = await Post.create({
+      image: req.body.image, // formData로 넘어 옴
       content: req.body.content, // 이름을 잘 맞춰 줘야 한다.
       UserId: req.user.id, // deserialize를 통해 req.user가 생성
     });
+
+    if (req.body.image) {
+      if (Array.isArray(req.body.image)) {
+        // 이미지를 여러 개 올리면 image: [ppby.png, ppby1.png] 배열형태로 들어 감
+        const images = await Promise.all(
+          req.body.image.map((image) => Image.create({ src: image }))
+        );
+        // -> 프로미스 배열이 된다. ppby.create 프로미스, ppby1.create 프로미스 -> 한방에 Promise.all로 한방에 저장(한 컬럼에)
+        // -> DB에는 파일 주소만 가지고 있다. 파일은 클라우드에 저장 (캐싱으로 속도도 향상된다.)
+        await post.addImages(images);
+      } else {
+        // 이미지를 하나만 올리면 image: ppby.png
+        const image = await Image.create({ src: req.body.image });
+        await post.addImages(image);
+      }
+    }
+
     // 정보 완성하기
     const fullPost = await Post.findOne({
       where: { id: post.id }, // 방금 등록한 post.id 가져오고
       include: [
         {
-          model: Image, // 이미지
+          model: Image, // 이미지 post.Images 로 알아서 들어간다.
         },
         {
           model: Comment, // 댓글
@@ -59,27 +99,6 @@ router.post('/', isLoggedIn, async (req, res, next) => {
   }
 });
 
-// multer는 라우터마다 별도의 세팅을 해주는 것이 좋다. (게시글마다 폼 전송이 다 다르기 떄문에)
-const upload = multer({
-  // 저장할 곳 (일단 클라우드 연결 전엔 하드웨어에 저장, s3 서비스)
-  storage: multer.diskStorage({
-    destination(req, file, done) {
-      done(null, 'uploads');
-    },
-    filename(req, file, done) {
-      // 노드에서는 파일명이 겹칠 때 이전 데이터에 덮어씌우기 떄문에 앞에 쓴 사람이 피해를 볼 수 있음
-      // 파일명 안 겹치게 만든다.
-      // 파일명 뒤에 업로드 시간을 붙혀 줌(1ms 단위)
-      // ppby.png
-      const ext = path.extname(file.originalname); // 확장자 추출(.png)
-      const basename = path.basename(file.originalname, ext); // 이름 추출(ppby)
-      done(null, basename + new Date().getTime() + ext); // ppby312412412352.png
-    },
-  }),
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB 로 제한
-  // !! 왠만하면 파일은 백엔드 서버를 거치지 않고 바로 클라우드로 전송하는 것이 좋다. (대규모일 경우)
-});
-
 /* 이미지 업로드 */
 // POST /post/images
 router.post(
@@ -92,8 +111,9 @@ router.post(
   }
 );
 
+/* 댓글 작성 */
+// POST /1/comment
 router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
-  // POST /post
   try {
     // 악성 사용자를 대비해서 확실하게 게시글이 있는지 확인한다.
     const post = await Post.findOne({

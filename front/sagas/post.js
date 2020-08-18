@@ -115,7 +115,7 @@ function* loadPosts(action) {
 }
 
 const addPostAPI = (data) => {
-  return axios.post('/post', { content: data }); // req.body.content 가 data가 된다.
+  return axios.post('/post', data); // formData는 그대로 보내야한다.
 };
 
 function* addPost(action) {

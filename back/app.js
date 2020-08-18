@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const path = require('path');
 
 const postRouter = require('./routes/post');
 const postsRouter = require('./routes/posts');
@@ -43,6 +44,8 @@ db.sequelize
 
 passportConfig();
 
+app.use('/', express.static(path.join(__dirname, 'uploads'))); // back 폴더 안에 uploads를 join으로 합친다. (운영체제마다 path의 표기가 달라서 path.join으로 설정)
+// '/' 를 붙힘으로써 프론트에서 back의 구조를 모르기 때문에 보안의 이점이 있다.
 app.use(morgan('dev'));
 // 상위에 적어야한다. 미들웨어 특성 상 요청한 데이터를 위에서 아래로 시작이 된다.
 app.use(
