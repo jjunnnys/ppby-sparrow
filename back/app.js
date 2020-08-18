@@ -60,8 +60,8 @@ app.use(
   - 백엔드 서버 쪽에서는 메모리를 아끼기 위해 쿠키에 사용자 정보를 다 매칭시키지 않고 id만 매칭
   - 세션 저장용 DB로 redis를 사용
 */
-app.use(express.json()); // json 형태로 req.body에 담는다.
-app.use(express.urlencoded({ extended: true })); // form submit 데이터를 처리
+app.use(express.json()); // json 형태로 req.body에 담는다. (axios를 통해서)
+app.use(express.urlencoded({ extended: true })); // form submit 데이터를 처리 (form 태그를 통해서)
 
 // 쿠키랑 세션이 필요한 이유는 브라우저랑 서버가 같은 정보를 들고 있어야 한다.
 app.use(cookieParser(process.env.COOKIE_SECRET));

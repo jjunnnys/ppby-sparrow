@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
-import { addPost } from '../reducers/post';
+import { addPost, UPLOAD_IMAGES_REQUEST } from '../reducers/post';
 import useInput from '../hooks/useInput';
 
 const PostForm = () => {
@@ -26,10 +26,24 @@ const PostForm = () => {
     imageInput.current.click();
   }, [imageInput.current]);
 
+  const onChangeImages = useCallback((e) => {
+    console.log(e.target.files); // 업로드한 이미지에 대한 정보가 들어 있음
+    // FormData 를 만들어서 multipart 형식으로 데이터를 보낸다.
+    const imageFormData = new FormData();
+    // e.target.files 은 배열이 아님 (배열 형태를 가진 객체) 그래서 forEach를 쓰기 위해 []을 쓴다.
+    [].forEach.call(e.target.files, (f) => {
+      imageFormData.append('image', f); // 키: image(->upload.array의 값과 일치해야 함), 값: f
+    });
+    dispatch({
+      type: UPLOAD_IMAGES_REQUEST,
+      data: imageFormData,
+    });
+  }, []);
+
   return (
     <Form
       style={{ margin: '10px 0 20px' }}
-      encType="multipart/form-data"
+      encType="multipart/form-data" // 이미지를 올리면 multipart/form-data 데이터 형식으로 올라감
       onFinish={onSubmit}
     >
       <Input.TextArea
@@ -39,7 +53,16 @@ const PostForm = () => {
         placeholder="어떤 일이 있었나요?"
       />
       <div>
-        <input type="file" multiple hidden ref={imageInput} />
+        {/* image input에서 올린게 upload.array로 전달된다. (name을 맞춰 줌) */}
+        {/* 이미지를 설정하고 올리면 onChange 이벤트가 발생한다. */}
+        <input
+          type="file"
+          name="image"
+          multiple
+          hidden
+          ref={imageInput}
+          onChange={onChangeImages}
+        />
         <Button onClick={onClickImageUpload}>이미지 업로드</Button>
         <Button
           type="primary"

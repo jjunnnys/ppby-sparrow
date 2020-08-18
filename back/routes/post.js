@@ -1,10 +1,21 @@
 const { Router } = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs'); // 파일시스템을 조작
 
 const { Post, Comment, Image, User } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 const db = require('../models');
 
 const router = Router();
+
+// uploads 폴더 생성
+try {
+  fs.accessSync('uploads');
+} catch (error) {
+  console.log('uploads 폴더가 없으므로 생성합니다.');
+  fs.mkdirSync('uploads');
+}
 
 router.post('/', isLoggedIn, async (req, res, next) => {
   // POST /post
@@ -47,6 +58,39 @@ router.post('/', isLoggedIn, async (req, res, next) => {
     next(error);
   }
 });
+
+// multer는 라우터마다 별도의 세팅을 해주는 것이 좋다. (게시글마다 폼 전송이 다 다르기 떄문에)
+const upload = multer({
+  // 저장할 곳 (일단 클라우드 연결 전엔 하드웨어에 저장, s3 서비스)
+  storage: multer.diskStorage({
+    destination(req, file, done) {
+      done(null, 'uploads');
+    },
+    filename(req, file, done) {
+      // 노드에서는 파일명이 겹칠 때 이전 데이터에 덮어씌우기 떄문에 앞에 쓴 사람이 피해를 볼 수 있음
+      // 파일명 안 겹치게 만든다.
+      // 파일명 뒤에 업로드 시간을 붙혀 줌(1ms 단위)
+      // ppby.png
+      const ext = path.extname(file.originalname); // 확장자 추출(.png)
+      const basename = path.basename(file.originalname, ext); // 이름 추출(ppby)
+      done(null, basename + new Date().getTime() + ext); // ppby312412412352.png
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB 로 제한
+  // !! 왠만하면 파일은 백엔드 서버를 거치지 않고 바로 클라우드로 전송하는 것이 좋다. (대규모일 경우)
+});
+
+/* 이미지 업로드 */
+// POST /post/images
+router.post(
+  '/images',
+  isLoggedIn,
+  upload.array('image'), // 이미지를 여러장 올릴 수 있게 하기 위해 array, 한장이면 single, 파일이 아닌 그냥 JSON이면 none(), 파일 input이 여러 개면 fields
+  (req, res, next) => {
+    console.log(req.files); // 업로드된 이미지 정보가 들어 있음
+    res.status(200).json(req.files.map((v) => v.filename));
+  }
+);
 
 router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
   // POST /post

@@ -22,6 +22,9 @@ export const initialSate = {
   addCommentLoading: false,
   addCommentDone: false,
   addCommentError: null,
+  uploadImagesLoading: false,
+  uploadImagesDone: false,
+  uploadImagesError: null,
 };
 
 /* 
@@ -31,6 +34,10 @@ export const initialSate = {
 */
 
 /* 액션 */
+
+export const UPLOAD_IMAGES_REQUEST = 'UPLOAD_IMAGES_REQUEST';
+export const UPLOAD_IMAGES_SUCCESS = 'UPLOAD_IMAGES_SUCCESS';
+export const UPLOAD_IMAGES_FAILURE = 'UPLOAD_IMAGES_FAILURE';
 
 export const LIKE_POST_REQUEST = 'LIKE_POST_REQUEST';
 export const LIKE_POST_SUCCESS = 'LIKE_POST_SUCCESS';
@@ -74,6 +81,22 @@ const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
   return prodece(state, (draft) => {
     switch (action.type) {
+      /* 이미지 업로드 */
+      case UPLOAD_IMAGES_REQUEST:
+        draft.uploadImagesLoading = true;
+        draft.uploadImagesDone = false;
+        draft.uploadImagesError = null;
+        break;
+      case UPLOAD_IMAGES_SUCCESS: {
+        draft.imagePaths = action.data; // 이미지 파일명이 저장된다.
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesDone = true;
+        break;
+      }
+      case UPLOAD_IMAGES_FAILURE:
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesError = action.error;
+        break;
       /* 좋아요 */
       case LIKE_POST_REQUEST:
         draft.likePostLoading = true;

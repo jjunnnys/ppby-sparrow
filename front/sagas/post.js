@@ -27,11 +27,34 @@ import {
   LIKE_POST_FAILURE,
   UNLIKE_POST_SUCCESS,
   UNLIKE_POST_FAILURE,
+  UPLOAD_IMAGES_REQUEST,
+  UPLOAD_IMAGES_SUCCESS,
+  UPLOAD_IMAGES_FAILURE,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
   REMOVE_POST_OF_USER_INFO,
 } from '../reducers/user';
+
+const uploadImagesAPI = (data) => {
+  // data 는 postId
+  return axios.post('/post/images', data); // formData를 그대로 보내줘야 함 json으로 만들면 안된다.
+};
+
+function* uploadImages(action) {
+  try {
+    const result = yield call(uploadImagesAPI, action.data);
+    yield put({
+      type: UPLOAD_IMAGES_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    yield put({
+      type: UPLOAD_IMAGES_FAILURE,
+      data: error.response.data,
+    });
+  }
+}
 
 const likePostAPI = (data) => {
   // data 는 postId
@@ -157,13 +180,8 @@ function* addComment(action) {
   }
 }
 
-function* watchLoadPosts() {
-  // throttle -> 너무 많은 스크롤 이벤트를 5초 안에 한 번만 실행 (하지만 요청된 REQUEST액션은 취소를 안한다.)
-  // 응답에 대한 것만 차단, 요청은 차단 못함
-  // 그러기 위해서 처음부터 요청을 안 보내면 된다. hasMorePosts && !loadPostsLoading
-  yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
-
-  /* 메모리 절약을 위한 -> react-virtualized 사용 */
+function* watchUploadImages() {
+  yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
 }
 
 function* watchLikePost() {
@@ -172,6 +190,15 @@ function* watchLikePost() {
 
 function* watchUnlikePost() {
   yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
+}
+
+function* watchLoadPosts() {
+  // throttle -> 너무 많은 스크롤 이벤트를 5초 안에 한 번만 실행 (하지만 요청된 REQUEST액션은 취소를 안한다.)
+  // 응답에 대한 것만 차단, 요청은 차단 못함
+  // 그러기 위해서 처음부터 요청을 안 보내면 된다. hasMorePosts && !loadPostsLoading
+  yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
+
+  /* 메모리 절약을 위한 -> react-virtualized 사용 */
 }
 
 function* watchAddPost() {
@@ -188,6 +215,7 @@ function* watchAddComment() {
 
 export default function* postSaga() {
   yield all([
+    fork(watchUploadImages),
     fork(watchLikePost),
     fork(watchUnlikePost),
     fork(watchLoadPosts),
