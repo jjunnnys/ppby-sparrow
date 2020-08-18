@@ -1,14 +1,28 @@
 import React, { useEffect } from 'react';
-import Head from 'next/Head';
-import { useSelector } from 'react-redux';
+import Head from 'next/head';
+import { useSelector, useDispatch } from 'react-redux';
 import Router from 'next/router';
 
 import AppLayout from '../components/AppLayout';
 import NicknameEditFrom from '../components/NicknameEditFrom';
 import FollowList from '../components/FollowList';
+import {
+  LOAD_FOLLOWERS_REQUEST,
+  LOAD_FOLLOWINGS_REQUEST,
+} from '../reducers/user';
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    dispatch({
+      type: LOAD_FOLLOWERS_REQUEST,
+    });
+    dispatch({
+      type: LOAD_FOLLOWINGS_REQUEST,
+    });
+  }, [dispatch]);
 
   // 로그인이 안 됐을 떄 프로필 못 가게 하기 (리다이렉트)
   useEffect(() => {
@@ -16,6 +30,7 @@ const Profile = () => {
       Router.push('/');
     }
   }, [userInfo && userInfo.id]);
+
   if (!userInfo) {
     return null;
   }

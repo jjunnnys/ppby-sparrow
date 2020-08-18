@@ -7,9 +7,27 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
-// 사용자 정보 복구(새로고침을 하면 이 요청이 간다. 단, 로그아웃된 상태여도 요청이 가서 수정)
+/*
+  요청/응답은 헤더(상태, 용량, 시간, 쿠키) 와 바디(데이터)로 구성
+  200 성공
+  300 리다이렉트
+  400 클라이언트 에러
+  500 서버 에러
+
+  - Access-Control-Allow-Origin -> 이 헤더가 없으면 XMLHttpRequest 에러가 뜬다. (Reaquest Headers)
+  - 브라우저(3060)에서 다른 도메인(3065)으로 요청을 보내면 브라우저에서 차단을 한다. (CORS)
+  - 서버(3060)에서 서버(3065)로 요청을하면 CORS가 안 생긴다.
+    -> 이 방법으로 해결 : 브라우저에서 프론트 서버로 요청을 보냄 (같은 도메인이라서 CORS 가 안생김)
+    -> 구조 : 브라우저 => 프론트 => 백 => 프론트 => 브라우저 -> 프록시 방식
+  - 또 다른 방법 res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3060')
+    -> 3060에서 오는 요청은 허용하겠다. (차단은 브라우저가 하는데 허용은 서버에서 한다.)
+  - 하지만 편하게 미들웨어로 처리
+*/
+
+/* user 정보 가져오기 */
+// GET /user
 router.get('/', async (req, res, next) => {
-  // GET /user
+  // 사용자 정보 복구(새로고침을 하면 이 요청이 간다. 단, 로그아웃된 상태여도 요청이 가서 수정)
   try {
     if (req.user) {
       // 짧은 정보만 불러오면 에러가 생김
@@ -52,25 +70,8 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-/*
-  요청/응답은 헤더(상태, 용량, 시간, 쿠키) 와 바디(데이터)로 구성
-  200 성공
-  300 리다이렉트
-  400 클라이언트 에러
-  500 서버 에러
-
-  - Access-Control-Allow-Origin -> 이 헤더가 없으면 XMLHttpRequest 에러가 뜬다. (Reaquest Headers)
-  - 브라우저(3060)에서 다른 도메인(3065)으로 요청을 보내면 브라우저에서 차단을 한다. (CORS)
-  - 서버(3060)에서 서버(3065)로 요청을하면 CORS가 안 생긴다.
-    -> 이 방법으로 해결 : 브라우저에서 프론트 서버로 요청을 보냄 (같은 도메인이라서 CORS 가 안생김)
-    -> 구조 : 브라우저 => 프론트 => 백 => 프론트 => 브라우저 -> 프록시 방식
-  - 또 다른 방법 res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3060')
-    -> 3060에서 오는 요청은 허용하겠다. (차단은 브라우저가 하는데 허용은 서버에서 한다.)
-  - 하지만 편하게 미들웨어로 처리
-*/
-
 /* 로그인 */
-// 로그인은 메소드가 애매하니까 post로 만든다.
+// POST /user/login
 router.post('/login', isNotLoggedIn, (req, res, next) => {
   // 이렇게 하면 미들웨어를 확장 (express 기법)
   passport.authenticate('local', (err, user, info) => {
@@ -96,11 +97,13 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
       const fullUserWithoutPassword = await User.findOne({
         where: { id: user.id },
         // 필요한 필드만 가져오기
-        attributes: ['id', 'nickname'], // 제외 시키는 방법으론 exclude: [''] 이런 식으로 작성
+        attributes: {
+          exclude: ['password'],
+        }, // 제외 시키는 방법으론 exclude: [''] 이런 식으로 작성
         include: [
           // User 모델에서 가져오기 (다른 테이블과의 관계를 자동으로 합쳐준다.)
           {
-            model: Post, // hasMany라서 'model: post' 가 복수형이 되어서 userInfo.Posts가 된다.
+            model: Post, // hasMany라서 'model: Post' 가 복수형이 되어서 userInfo.Posts가 된다.
             attributes: ['id'],
           },
           {
@@ -123,8 +126,9 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
 }); // POST /user/login
 
 /* 로그아웃 */
-// 로그인 이후에는 req.user에 사용자 정보가 들어가 있음
+// POST /user/logout
 router.post('/logout', isLoggedIn, (req, res, next) => {
+  // 로그인 이후에는 req.user에 사용자 정보가 들어가 있음
   try {
     // 세션 지우고 쿠키 지우기
     req.logOut();
@@ -136,7 +140,7 @@ router.post('/logout', isLoggedIn, (req, res, next) => {
 });
 
 /* 회원가입 */
-// POST /user/
+// POST /user
 router.post('/', isNotLoggedIn, async (req, res, next) => {
   try {
     // (공식문서 보고 비동기 함수인지 찾는다.) exUser에 req.body.email이 기존 테이블 안에 있는지 확인해서 exUser에 담는다. (없으면 null)
@@ -168,6 +172,7 @@ router.post('/', isNotLoggedIn, async (req, res, next) => {
   }
 });
 
+/* 닉네임 변경 */
 // PATCH /nickname
 router.patch('/nickname', isLoggedIn, async (req, res, next) => {
   try {
@@ -181,6 +186,84 @@ router.patch('/nickname', isLoggedIn, async (req, res, next) => {
       }
     );
     res.status(200).json({ nickname: req.body.nickname });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+/* 팔로잉 하기 */
+// PATCH /user/1/follow
+router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.params.userId } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('팔로우하려는 사람이 없습니다.');
+    }
+    await user.addFollower(req.user.id); // 복수로 쓰면 무조건 된다. (하지만 단수가 말이 맞을 경우 테스트해 보기)
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+/* 팔로잉 취소 */
+// DELETE /user/1/follow
+router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.params.userId } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('언팔로우하려는 사람이 없습니다.');
+    }
+    await user.removeFollower(req.user.id); // 복수로 쓰면 무조건 된다. (하지만 단수가 말이 맞을 경우 테스트해 보기)
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+/* 팔로워 차단(취소) */
+// DELETE /user/follower/1
+router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.params.userId } });
+    if (!user) {
+      res.status(403).send('차단하려는 사람이 없습니다.');
+    }
+    await user.removeFollowing(req.user.id); //
+    res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+// GET /user/followers
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('없는 사람입니다.');
+    }
+    const followers = await user.getFollowers();
+    res.status(200).json(followers);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+// GET /user/followings
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('없는 사람입니다.');
+    }
+    const followings = await user.getFollowings(); // 복수로 쓰면 무조건 된다. (하지만 단수가 말이 맞을 경우 테스트해 보기)
+    res.status(200).json(followings);
   } catch (error) {
     console.error(error);
     next(error);

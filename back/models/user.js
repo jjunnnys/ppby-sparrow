@@ -41,12 +41,12 @@ module.exports = (sequelize, DataTypes) => {
     db.User.belongsToMany(db.User, {
       through: 'Follow',
       as: 'Followers',
-      foreignkey: 'FollowingId', // 반대로 생각, 나의 팔로워를 찾기 위해선 팔로잉 목록에서 나를 찾고 거기에서 팔로워를 찾는다.
+      foreignKey: 'FollowingId', // 반대로 생각, 나의 팔로워를 찾기 위해선 팔로잉 목록에서 나를 찾고 거기에서 팔로워를 찾는다.
     });
     db.User.belongsToMany(db.User, {
       through: 'Follow',
       as: 'Followings',
-      foreignkey: 'FollowerId', // foreignkey 를 통해 (UserId 가 곂치는 상황) 새로운 id를 등록
+      foreignKey: 'FollowerId', // foreignkey 를 통해 (UserId 가 곂치는 상황) 새로운 id를 등록
     });
   };
 
