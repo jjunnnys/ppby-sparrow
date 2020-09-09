@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs'); // 파일시스템을 조작
 
-const { Post, Comment, Image, User } = require('../models');
+const { Post, Comment, Image, User, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 const db = require('../models');
 
@@ -42,12 +42,27 @@ const upload = multer({
 // POST /post
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
   try {
+    const hashtags = req.body.content.match(/#[^\s#]+/g);
     // 프론트에서 생성한 게시글이 post 에 객체로 담긴다.
     const post = await Post.create({
       image: req.body.image, // formData로 넘어 옴
       content: req.body.content, // 이름을 잘 맞춰 줘야 한다.
       UserId: req.user.id, // deserialize를 통해 req.user가 생성
     });
+
+    if (hashtags) {
+      const result = await Propmise.all(
+        hashtags.map(
+          // 기존에 해쉬태그가 있으면 가져오고 없으면 등록
+          (tag) =>
+            Hashtag.findOrCreate({
+              whrere: { name: tag.slice(1).toLowerCase() },
+            }) // slice(1)은 해쉬태그(#)를 때버린다(대문자로 검색하나 소문자로 검색하나 검색이 되기 위해서 DB에 소문자로 통일해서 저장)
+        )
+      );
+      // result 값이 [#노드,true], [#리액트,true] -> 뒤에는 생성됐는지 가져 왔는지 알려 줌
+      await post.addHashtags(result.map((v) => v[0]));
+    }
 
     if (req.body.image) {
       if (Array.isArray(req.body.image)) {
