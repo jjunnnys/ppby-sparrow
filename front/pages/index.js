@@ -14,9 +14,12 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const { userInfo } = useSelector((state) => state.user);
-  const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector(
-    (state) => state.post
-  );
+  const {
+    mainPosts,
+    hasMorePosts,
+    loadPostsLoading,
+    retweetError,
+  } = useSelector((state) => state.post);
 
   // 페이지 접속할 때 사용자 정보와 게시글 불러 옴 (전체 정보를 채워서 준다.)
   useEffect(() => {
@@ -28,6 +31,12 @@ const Home = () => {
       type: LOAD_POSTS_REQUEST,
     });
   }, []);
+
+  useEffect(() => {
+    if (retweetError) {
+      alert(retweetError);
+    }
+  }, [retweetError]);
 
   // useEffect(() => {
   //   // 스크롤 현재 위치 파악

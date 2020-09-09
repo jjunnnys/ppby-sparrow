@@ -41,6 +41,19 @@ router.get('/', async (req, res, next) => {
           as: 'Likers', // 다른 User와 구별이 된다.
           attributes: ['id'],
         },
+        {
+          model: Post,
+          as: 'Retweet',
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+            },
+            {
+              model: Image,
+            },
+          ],
+        },
       ],
     });
     res.status(200).json(posts);
