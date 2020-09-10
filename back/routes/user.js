@@ -28,6 +28,7 @@ const router = express.Router();
 // GET /user
 router.get('/', async (req, res, next) => {
   // 사용자 정보 복구(새로고침을 하면 이 요청이 간다. 단, 로그아웃된 상태여도 요청이 가서 수정)
+
   try {
     if (req.user) {
       // 짧은 정보만 불러오면 에러가 생김

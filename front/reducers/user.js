@@ -2,8 +2,7 @@ import produce from 'immer';
 
 export const initialSate = {
   userInfo: null,
-  signUpdate: {},
-  loginData: {},
+  otherUserInfo: null,
   loadMyInfoLoading: false, // 유저 정보 가져오기 시도 중
   loadMyInfoDone: false,
   loadMyInfoError: null,
