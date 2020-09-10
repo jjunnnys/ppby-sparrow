@@ -15,7 +15,8 @@ const configureStore = () => {
       : composeWithDevTools(applyMiddleware(...middlewares)); // 개발용
 
   const store = createStore(rootReducer, enhancer);
-  sagaMiddleware.run(rootSaga);
+  store.sagaTask = sagaMiddleware.run(rootSaga); // SSR을 하기 위해
+
   return store;
 };
 

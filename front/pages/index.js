@@ -1,14 +1,16 @@
 // import React from 'react' ;  next에서는 꼭 안 써도 된다.
 /* 폴더 이름은 꼭 pages로 지정 -> next가 인식해서 여기 안에 있는 파일을 개별적인 페이지로 만들어 줌 (코드 스플리팅) */
 
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { END } from 'redux-saga';
 
 import AppLayout from '../components/AppLayout';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
 import { LOAD_POSTS_REQUEST } from '../reducers/post';
 import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
+import wrapper from '../store/configuerStore';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -20,17 +22,6 @@ const Home = () => {
     loadPostsLoading,
     retweetError,
   } = useSelector((state) => state.post);
-
-  // 페이지 접속할 때 사용자 정보와 게시글 불러 옴 (전체 정보를 채워서 준다.)
-  useEffect(() => {
-    dispatch({
-      // 매번 로그인 상태 복구해 주기 위해서
-      type: LOAD_MY_INFO_REQUEST,
-    });
-    dispatch({
-      type: LOAD_POSTS_REQUEST,
-    });
-  }, []);
 
   useEffect(() => {
     if (retweetError) {
@@ -78,5 +69,24 @@ const Home = () => {
     </AppLayout>
   );
 };
+
+// Home 보다 먼저 그려진다.
+// 이 부분에서 dispatch를 하면 스토어에 변화가 생긴다.
+// 밑에서 실행된 결과를 HIDERATE로 보내준다.
+export const getServerSideProps = wrapper.getServerSideProps(
+  async (context) => {
+    console.log('context', context);
+    context.store.dispatch({
+      // 매번 로그인 상태 복구해 주기 위해서
+      type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch({
+      type: LOAD_POSTS_REQUEST,
+    });
+    // 지금 상태에선 SUCCESS를 기다리지 못하고 반환된다. -> 보완하기 위해 END 사용 (기다려 줌)
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise(); // (사용법) store에 등록한 sagaTask
+  }
+);
 
 export default Home;
