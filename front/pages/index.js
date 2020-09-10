@@ -14,9 +14,12 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const { userInfo } = useSelector((state) => state.user);
-  const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector(
-    (state) => state.post
-  );
+  const {
+    mainPosts,
+    hasMorePosts,
+    loadPostsLoading,
+    retweetError,
+  } = useSelector((state) => state.post);
 
   // 페이지 접속할 때 사용자 정보와 게시글 불러 옴 (전체 정보를 채워서 준다.)
   useEffect(() => {
@@ -29,33 +32,42 @@ const Home = () => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   // 스크롤 현재 위치 파악
-  //   const onScroll = () => {
-  //     // 많이 쓰는 스크롤 위치 파악하는 함수
-  //     // console.log(
-  //     // eslint-disable-next-line max-len
-  //     //   `얼마나 내렸는지(화면 위에 기준) :${window.scrollY} | 화면에 보이는 길이 :${document.documentElement.clientHeight} | 총 길이 :${document.documentElement.scrollHeight}`
-  //     // );
+  useEffect(() => {
+    if (retweetError) {
+      alert(retweetError);
+    }
+  }, [retweetError]);
 
-  //     // 화면 끝에서 300px 위에서 데이터 불러오기
-  //     if (
-  //       window.scrollY + document.documentElement.clientHeight >
-  //       document.documentElement.scrollHeight - 300
-  //     ) {
-  //       // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
-  //       if (hasMorePosts && !loadPostsLoading) {
-  //         dispatch({
-  //           type: LOAD_POSTS_REQUEST,
-  //         });
-  //       }
-  //     }
-  //   };
-  //   window.addEventListener('scroll', onScroll); // 주의 클린업 함수로 window를 제거 해야함
-  //   return () => {
-  //     window.removeEventListener('scroll', onScroll); // 이 작업을 안하면 메모리에 계속 쌓여있는다.
-  //   };
-  // }, [hasMorePosts, loadPostsLoading]);
+  useEffect(() => {
+    // 스크롤 현재 위치 파악
+    const onScroll = () => {
+      // 많이 쓰는 스크롤 위치 파악하는 함수
+      // console.log(
+      // eslint-disable-next-line max-len
+      //   `얼마나 내렸는지(화면 위에 기준) :${window.scrollY} | 화면에 보이는 길이 :${document.documentElement.clientHeight} | 총 길이 :${document.documentElement.scrollHeight}`
+      // );
+
+      // 화면 끝에서 300px 위에서 데이터 불러오기
+      if (
+        window.scrollY + document.documentElement.clientHeight >
+        document.documentElement.scrollHeight - 300
+      ) {
+        // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
+        if (hasMorePosts && !loadPostsLoading) {
+          const lastId = mainPosts[mainPosts.length - 1]?.id; // 마지막 게시글의 id
+          dispatch({
+            type: LOAD_POSTS_REQUEST,
+            lastId,
+          });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', onScroll); // 주의 클린업 함수로 window를 제거 해야함
+    return () => {
+      window.removeEventListener('scroll', onScroll); // 이 작업을 안하면 메모리에 계속 쌓여있는다.
+    };
+  }, [hasMorePosts, loadPostsLoading, mainPosts]);
 
   return (
     <AppLayout>

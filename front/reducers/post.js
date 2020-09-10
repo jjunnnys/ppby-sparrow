@@ -25,6 +25,9 @@ export const initialSate = {
   uploadImagesLoading: false,
   uploadImagesDone: false,
   uploadImagesError: null,
+  retweetLoading: false,
+  retweetDone: false,
+  retweetError: null,
 };
 
 /* 
@@ -63,6 +66,10 @@ export const ADD_COMMENT_REQUEST = 'ADD_COMMENT_REQUEST';
 export const ADD_COMMENT_SUCCESS = 'ADD_COMMENT_SUCCESS';
 export const ADD_COMMENT_FAILURE = 'ADD_COMMENT_FAILURE';
 
+export const RETWEET_REQUEST = 'RETWEET_REQUEST';
+export const RETWEET_SUCCESS = 'RETWEET_SUCCESS';
+export const RETWEET_FAILURE = 'RETWEET_FAILURE';
+
 export const REMOVE_IMAGE = 'REMOVE_IMAGE'; // 동기액션
 
 /* 동적 액션 생성함수 */
@@ -83,6 +90,22 @@ const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
   return prodece(state, (draft) => {
     switch (action.type) {
+      /* 리트윗 */
+      case RETWEET_REQUEST:
+        draft.retwwetLoading = true;
+        draft.retwwetDone = false;
+        draft.retwwetError = null;
+        break;
+      case RETWEET_SUCCESS: {
+        draft.mainPosts.unshift(action.data);
+        draft.retwwetLoading = false;
+        draft.retwwetDone = true;
+        break;
+      }
+      case RETWEET_FAILURE:
+        draft.retwwetLoading = false;
+        draft.retwwetError = action.error;
+        break;
       /* 이미지 제거 (프론트에서만 지운다, 이미지는 서버 쪽에서 잘 안지운다. 머신러닝 등...) */
       case REMOVE_IMAGE:
         draft.imagePaths = draft.imagePaths.filter(
@@ -154,9 +177,9 @@ const reducer = (state = initialSate, action) => {
       case LOAD_POSTS_SUCCESS:
         draft.loadPostsLoading = false;
         draft.loadPostsDone = true;
-        draft.mainPosts = action.data.concat(draft.mainPosts);
+        draft.mainPosts = draft.mainPosts.concat(action.data);
         // 포스트 불러오기 제한 하기
-        draft.hasMorePosts = draft.mainPosts.length < 50; // 일단 50개 까지 임의로 설정, 50이 되면 false가 되서 포스트를 더 이상 안가져 온다.
+        draft.hasMorePosts = action.data.length === 10; // 불러온 게시글의 수가 10 미만이면 끝
         break;
       case LOAD_POSTS_FAILURE:
         draft.loadPostsLoading = false;

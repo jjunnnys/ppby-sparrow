@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs'); // 파일시스템을 조작
 
-const { Post, Comment, Image, User } = require('../models');
+const { Post, Comment, Image, User, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 const db = require('../models');
 
@@ -42,12 +42,27 @@ const upload = multer({
 // POST /post
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
   try {
+    const hashtags = req.body.content.match(/#[^\s#]+/g);
     // 프론트에서 생성한 게시글이 post 에 객체로 담긴다.
     const post = await Post.create({
       image: req.body.image, // formData로 넘어 옴
       content: req.body.content, // 이름을 잘 맞춰 줘야 한다.
       UserId: req.user.id, // deserialize를 통해 req.user가 생성
     });
+
+    if (hashtags) {
+      const result = await Promise.all(
+        hashtags.map(
+          // 기존에 해쉬태그가 있으면 가져오고 없으면 등록
+          (tag) =>
+            Hashtag.findOrCreate({
+              whrere: { name: tag.slice(1).toLowerCase() },
+            }) // slice(1)은 해쉬태그(#)를 때버린다(대문자로 검색하나 소문자로 검색하나 검색이 되기 위해서 DB에 소문자로 통일해서 저장)
+        )
+      );
+      // result 값이 [#노드,true], [#리액트,true] -> 뒤에는 생성됐는지 가져 왔는지 알려 줌
+      await post.addHashtags(result.map((v) => v[0]));
+    }
 
     if (req.body.image) {
       if (Array.isArray(req.body.image)) {
@@ -110,6 +125,95 @@ router.post(
     res.status(200).json(req.files.map((v) => v.filename));
   }
 );
+
+/* 리트윗 */
+// POST /1/comment
+router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
+  try {
+    // 악성 사용자를 대비해서 확실하게 게시글이 있는지 확인한다.
+    const post = await Post.findOne({
+      where: { id: req.params.postId },
+      include: [
+        {
+          model: Post,
+          as: 'Retweet',
+        },
+      ],
+    });
+    if (!post) {
+      return res.status(403).send('존재하지 않는 게시글입니다.'); // 금지
+    }
+
+    // 본인 게시글 리트윗 방지
+    if (
+      req.user.id === post.UserId ||
+      (post.Retweet && post.Retweet.UserId === req.user.id)
+    ) {
+      return res.status(403).send('자신의 글은 리트윗할 수 없습니다');
+    }
+
+    // 다른사람이 리트윗한 건 또 리트위할 수 있다
+    const retweetTargetId = post.RetweetId || post.id;
+
+    // 같은 게시글 리트윗 방지
+    const exPost = await Post.findOne({
+      where: {
+        UserId: req.user.id,
+        RetweetId: retweetTargetId,
+      },
+    });
+
+    if (exPost) {
+      return res.status(403).send('이미 리트윗했습니다');
+    }
+
+    const retweet = await Post.create({
+      UserId: req.user.id,
+      RetweetId: retweetTargetId,
+      content: 'retweet',
+    });
+
+    // 어떤 게시글 리트윗 했는지 표시
+    const retweetWithPrevPost = await Post.findOne({
+      where: { id: retweet.id },
+      include: [
+        {
+          model: Post,
+          as: 'Retweet',
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+            },
+            {
+              model: Image,
+            },
+          ],
+        },
+        {
+          model: User,
+          attributes: ['id', 'nickname'],
+        },
+        {
+          model: Image,
+        },
+        {
+          modle: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+            },
+          ],
+        },
+      ],
+    });
+    res.status(201).json(fullComment); // 잘 생성 되고 프론트에 돌려 줌
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
 /* 댓글 작성 */
 // POST /1/comment

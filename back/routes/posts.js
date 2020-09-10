@@ -1,5 +1,6 @@
 /* 포스트 불러오는 과정에서 limit와 offset 방법 */
 const { Router } = require('express');
+const { Op } = require('sequelize');
 
 const { Post, User, Image, Comment } = require('../models');
 
@@ -7,6 +8,13 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
+    const wherre = {}; // 초기 로딩일 때랑 초기 로딩이 아닐 때 불러오는 조건이 다름
+
+    // 초기 로딩이 아닐 때
+    if (parseInt(req.query.lastId, 10)) {
+      wherre.id = { [Op.lt]: parseInt(req.query.lastId, 10) }; // id가 lastId 보다 작은 -> [Op.lt]
+    } // 10개 를 불러왔을 때 그 lastId 보다 작은 게사물을 불러 와야 함
+
     // 여러 개 가져오기
     const posts = await Post.findAll({
       /* 중간에 게시글을 추가 삭제할 경우 치명적인 단점이 있다. 그래서 limit, lastId 방식을 사용한다. */
@@ -40,6 +48,19 @@ router.get('/', async (req, res, next) => {
           model: User, // 좋아요 누른 사람
           as: 'Likers', // 다른 User와 구별이 된다.
           attributes: ['id'],
+        },
+        {
+          model: Post,
+          as: 'Retweet',
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+            },
+            {
+              model: Image,
+            },
+          ],
         },
       ],
     });
