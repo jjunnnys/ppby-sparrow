@@ -3,7 +3,7 @@
     1. 크게 기능 그려보기
     2. 구현하기
 */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
@@ -17,35 +17,67 @@ import {
 import PostImages from './PostImages';
 import CommentForm from './CommentForm';
 import PostCardContent from './PostCardContent';
-import { REMOVE_POST_REQUEST } from '../reducers/post';
+import {
+  REMOVE_POST_REQUEST,
+  LIKE_POST_REQUEST,
+  UNLIKE_POST_REQUEST,
+  RETWEET_REQUEST,
+} from '../reducers/post';
+import FollowButton from './FollowButton';
 
 const PostCard = ({ post }) => {
-  const [liked, setLiked] = useState(false);
   const [commentFormOpend, setCommentFormOpend] = useState(false);
   const dispatch = useDispatch();
   const { removePostLoading } = useSelector((state) => state.post);
   const { userInfo } = useSelector((state) => state.user);
 
-  const onToggleLike = useCallback(() => {
-    // 토글 이벤트에선 항상 (prev)=>!prev (이전 데이터의 반대 값을 리턴)
-    setLiked((prev) => !prev);
-  }, []);
+  const id = userInfo?.id;
+  const liked = post.Likers.find((v) => v.id === id); // 게시글에 좋아요를 누른 사람 중에 내가 있는지 확인
+
+  const onLike = useCallback(() => {
+    if (!id) {
+      return alert('로그인이 필요합니다');
+    }
+    dispatch({
+      type: LIKE_POST_REQUEST,
+      data: post.id, // 게시글 id
+      // 사용자 id는 담을 필요가 없다.
+    });
+  }, [post, id]);
+
+  const onUnlike = useCallback(() => {
+    if (!id) {
+      return alert('로그인이 필요합니다');
+    }
+    return dispatch({
+      type: UNLIKE_POST_REQUEST,
+      data: post.id, // 게시글 id
+    });
+  }, [post, id]);
 
   const onToggleComment = useCallback(() => {
     setCommentFormOpend((prev) => !prev);
-  }, []);
+  }, [id]);
 
   const onRemovePost = useCallback(() => {
-    dispatch({
+    if (!id) {
+      return alert('로그인이 필요합니다');
+    }
+    return dispatch({
       type: REMOVE_POST_REQUEST,
       data: post.id,
     });
   }, [post]);
 
-  // 새로운 문법 ( userInfo && userInfo.id ) 와 동일 -> optional chaining
-  const id = userInfo?.id;
-  // 더 간단하게
-  //   const { id } = useSelector((state) => state.user.userInfo?.id);
+  const onRetweet = useCallback(() => {
+    if (!id) {
+      return alert('로그인이 필요합니다');
+    }
+    return dispatch({
+      type: RETWEET_REQUEST,
+    });
+  }, [id]);
+
   return (
     <div style={{ marginTop: '20px' }}>
       <Card
@@ -53,15 +85,15 @@ const PostCard = ({ post }) => {
         cover={post.Images[0] && <PostImages images={post.Images} />}
         // 버튼
         actions={[
-          <RetweetOutlined key="retweet" />,
+          <RetweetOutlined key="retweet" onClick={onRetweet} />,
           liked ? (
             <HeartTwoTone
               twoToneColor="#eb2f96"
               key="heart"
-              onClick={onToggleLike}
+              onClick={onUnlike}
             />
           ) : (
-            <HeartOutlined key="heart" onClick={onToggleLike} />
+            <HeartOutlined key="heart" onClick={onLike} />
           ),
           <MessageOutlined key="comment" onClick={onToggleComment} />,
           // ... 에 커서를 올렸을 떄 툴팁 박스 나옴
@@ -90,12 +122,33 @@ const PostCard = ({ post }) => {
             <EllipsisOutlined />
           </Popover>,
         ]}
+        title={
+          post.RetweetId ? `${post.User.nickname}님이 리트윗하셨습니다` : null
+        }
+        // 로그인을 했을 때만 팔로우 버튼 보이게
+        extra={id && <FollowButton post={post} />}
       >
-        <Card.Meta
-          avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
-          title={post.User.nickname}
-          description={<PostCardContent postData={post.content} />}
-        />
+        {post.RetweetId && post.Retweet ? (
+          <Card
+            cover={
+              post.Retweet.Images[0] && (
+                <PostImages images={post.Retweet.Images} />
+              )
+            }
+          >
+            <Card.Meta
+              avatar={<Avatar>{post.Retweet.User.nickname[0]}</Avatar>}
+              title={post.Retweet.User.nickname}
+              description={<PostCardContent postData={post.Retweet.content} />}
+            />
+          </Card>
+        ) : (
+          <Card.Meta
+            avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+            title={post.User.nickname}
+            description={<PostCardContent postData={post.content} />}
+          />
+        )}
       </Card>
       {commentFormOpend && (
         <div>
@@ -104,12 +157,12 @@ const PostCard = ({ post }) => {
           <List
             header={`${post.Comments.length}개의 댓글`}
             itemLayout="horizontal"
-            dataSource={post.Comments} // Comments 배열의 각각의 인덱스가 item으로 들어감
+            dataSource={post.Comments} // Comments 배열의 각각의 인덱스가 item으로 들어감 (DB에서 넘어오는 데이터는 다 대문자로 시작)
             renderItem={(item) => (
               <li>
                 <Comment
-                  author={item.user.nickname}
-                  avatar={<Avatar>{item.user.nickname[0]}</Avatar>} // 동그라미에 첫번 째 글자만 나옴
+                  author={item.User.nickname}
+                  avatar={<Avatar>{item.User.nickname[0]}</Avatar>} // 동그라미에 첫번 째 글자만 나옴
                   content={item.content}
                 />
               </li>
@@ -127,9 +180,12 @@ PostCard.prototype = {
     id: PropTypes.number,
     User: PropTypes.object,
     content: PropTypes.string,
-    createdAt: PropTypes.object,
+    createdAt: PropTypes.string,
     Comments: PropTypes.arrayOf(PropTypes.object),
     Images: PropTypes.arrayOf(PropTypes.object),
+    Likers: PropTypes.arrayOf(PropTypes.object),
+    RetweetId: PropTypes.number,
+    Retweet: PropTypes.objectOf(PropTypes.any),
   }).isRequired,
 };
 

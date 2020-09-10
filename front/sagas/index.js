@@ -1,4 +1,6 @@
 import { all, fork } from 'redux-saga/effects'; // saga effect
+import axios from 'axios';
+
 import postSaga from './post';
 import userSaga from './user';
 
@@ -15,6 +17,10 @@ import userSaga from './user';
   ---
   yield 같은 걸 많이 넣어 놓을 수록 test 환경에서 유리하다.
 */
+
+axios.defaults.baseURL = 'http://localhost:3065';
+// 중복되는 건 index에 적음
+axios.defaults.withCredentials = true; // 쿠키 전달(다른 도메인 주소일 경우) -> !! true일 경우 origin: * 이면 안된다. 무조건 주소를 똑바르게 적어라
 
 export default function* rootSaga() {
   yield all([

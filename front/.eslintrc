@@ -32,6 +32,7 @@
     "comma-dangle": "off",
     "no-trailing-spaces": "off",
     "react/react-in-jsx-scope": "off",
-    "no-case-declarations": "off"
+    "no-case-declarations": "off",
+    "implicit-arrow-linebreak": "off"
   }
 }

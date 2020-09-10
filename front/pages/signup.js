@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/Head';
-import AppLayout from '../components/AppLayout';
+import Router from 'next/router';
 import { Form, Input, Checkbox, Button } from 'antd';
-import useInput from '../hooks/useInput';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+
+import AppLayout from '../components/AppLayout';
+import useInput from '../hooks/useInput';
 import { SIGN_UP_REQUEST } from '../reducers/user';
 
 const ErrorMessage = styled.div`
@@ -21,7 +23,30 @@ const Signup = () => {
   const [termError, setTermError] = useState(false);
 
   const dispatch = useDispatch();
-  const { signUpLoading } = useSelector((state) => state.user);
+  const { signUpLoading, signUpDone, signUpError, userInfo } = useSelector(
+    (state) => state.user
+  );
+
+  // 로그인 되었을 땐 회원가입 페이지에 들어가면 홈으로 리다이랙트
+  useEffect(() => {
+    if (userInfo && userInfo.id) {
+      Router.replace('/'); // 검색기록에 안 남음 (push는 검색 기록에 남음)
+    }
+  }, [userInfo && userInfo.id]);
+
+  useEffect(() => {
+    // 회원가입 완료되면 메인페이지로 이동, 프로필하고 비슷
+    if (signUpDone) {
+      Router.replace('/');
+    }
+  }, [signUpDone]);
+
+  useEffect(() => {
+    // 빠르게 하기 위해 alert 사용, state를 이용해 화면에 그려줘도 된다.
+    if (signUpError) {
+      alert(signUpError); // 에러메세지는 백엔드에서 넘어온다.
+    }
+  }, [signUpError]);
 
   const onChangePasswordCheck = useCallback(
     (e) => {
@@ -36,6 +61,7 @@ const Signup = () => {
     setTermError(false);
   }, []);
 
+  // eslint-disable-next-line consistent-return
   const onSubmit = useCallback(() => {
     // 한번 더 체크
     if (password !== passwordCheck) {
@@ -44,7 +70,7 @@ const Signup = () => {
     if (!term) {
       return setTermError(true);
     }
-    console.log(`서버로 보내는 데이터 ${email} ${password} ${nickname}`);
+
     dispatch({
       type: SIGN_UP_REQUEST,
       data: { email, password, nickname },
@@ -52,70 +78,74 @@ const Signup = () => {
   }, [email, password, passwordCheck, term]);
 
   return (
-    <AppLayout>
+    <>
       <Head>
         <title>회원가입 | ppby sparrow</title>
       </Head>
-      <Form onFinish={onSubmit}>
-        <div>
-          <label htmlFor="user-email">이메일</label>
-          <br />
-          <Input
-            name="user-email"
-            type="email"
-            value={email}
-            required
-            onChange={onChangeEmail}
-          />
-        </div>
-        <div>
-          <label htmlFor="user-nickname">닉네임</label>
-          <br />
-          <Input
-            name="user-nickname"
-            value={nickname}
-            required
-            onChange={onChangeNickname}
-          />
-        </div>
-        <div>
-          <label htmlFor="user-password">비밀번호</label>
-          <br />
-          <Input
-            name="user-password"
-            type="password"
-            value={password}
-            required
-            onChange={onChangePassword}
-          />
-        </div>
-        <div>
-          <label htmlFor="user-password-check">비밀번호 체크</label>
-          <br />
-          <Input
-            name="user-password-check"
-            type="password"
-            value={passwordCheck}
-            required
-            onChange={onChangePasswordCheck}
-          />
-          {passwordError && (
-            <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
-          )}
-        </div>
-        <div>
-          <Checkbox name="user-term" checked={term} onChange={onChangeTerm}>
-            가입을 동의합니다.
-          </Checkbox>
-          {termError && <ErrorMessage>약관에 동의하셔야 합니다.</ErrorMessage>}
-        </div>
-        <div style={{ marginTop: 10 }}>
-          <Button type="primary" htmlType="submit" loading={signUpLoading}>
-            가입하기
-          </Button>
-        </div>
-      </Form>
-    </AppLayout>
+      <AppLayout>
+        <Form onFinish={onSubmit}>
+          <div>
+            <label htmlFor="user-email">이메일</label>
+            <br />
+            <Input
+              name="user-email"
+              type="email"
+              value={email}
+              required
+              onChange={onChangeEmail}
+            />
+          </div>
+          <div>
+            <label htmlFor="user-nickname">닉네임</label>
+            <br />
+            <Input
+              name="user-nickname"
+              value={nickname}
+              required
+              onChange={onChangeNickname}
+            />
+          </div>
+          <div>
+            <label htmlFor="user-password">비밀번호</label>
+            <br />
+            <Input
+              name="user-password"
+              type="password"
+              value={password}
+              required
+              onChange={onChangePassword}
+            />
+          </div>
+          <div>
+            <label htmlFor="user-password-check">비밀번호 체크</label>
+            <br />
+            <Input
+              name="user-password-check"
+              type="password"
+              value={passwordCheck}
+              required
+              onChange={onChangePasswordCheck}
+            />
+            {passwordError && (
+              <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
+            )}
+          </div>
+          <div>
+            <Checkbox name="user-term" checked={term} onChange={onChangeTerm}>
+              가입을 동의합니다.
+            </Checkbox>
+            {termError && (
+              <ErrorMessage>약관에 동의하셔야 합니다.</ErrorMessage>
+            )}
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <Button type="primary" htmlType="submit" loading={signUpLoading}>
+              가입하기
+            </Button>
+          </div>
+        </Form>
+      </AppLayout>
+    </>
   );
 };
 

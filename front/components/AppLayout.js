@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link'; // react의 router의 기능
 import { Menu, Input, Row, Col } from 'antd';
-import UserProfile from './UserProfile';
-import LoginForm from './LoginForm';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+
+import UserProfile from './UserProfile';
+import LoginForm from './LoginForm';
 
 // 컴포넌트 자체를 스타일링 하는 거면 이렇게 표현
 const SearchInput = styled(Input.Search)`

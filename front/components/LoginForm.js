@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import Link from 'next/Link';
 import styled from 'styled-components';
@@ -15,10 +15,16 @@ const FormWrapper = styled(Form)`
 `;
 
 const LoginForm = () => {
+  const dispatch = useDispatch();
+  const { logInLoading, logInError } = useSelector((state) => state.user);
   const [email, onChangeEmail] = useInput(''); // mysql에서 id 값을 자동으로 붙혀주는 거랑 헷갈릴 수 있어서 (email로 바꿈)
   const [password, onChangePassword] = useInput('');
-  const { logInLoading } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (logInError) {
+      alert(logInError);
+    }
+  }, [logInError]);
 
   const onSubmitForm = useCallback(() => {
     dispatch(
