@@ -110,8 +110,8 @@ function* unlikePost(action) {
   }
 }
 
-const loadPostsAPI = (data) => {
-  return axios.get('/posts', data);
+const loadPostsAPI = (lastId) => {
+  return axios.get(`/posts?lasId=${lastId || 0}`);
 };
 
 function* loadPosts(action) {

@@ -177,9 +177,9 @@ const reducer = (state = initialSate, action) => {
       case LOAD_POSTS_SUCCESS:
         draft.loadPostsLoading = false;
         draft.loadPostsDone = true;
-        draft.mainPosts = action.data.concat(draft.mainPosts);
+        draft.mainPosts = draft.mainPosts.concat(action.data);
         // 포스트 불러오기 제한 하기
-        draft.hasMorePosts = draft.mainPosts.length < 50; // 일단 50개 까지 임의로 설정, 50이 되면 false가 되서 포스트를 더 이상 안가져 온다.
+        draft.hasMorePosts = action.data.length === 10; // 불러온 게시글의 수가 10 미만이면 끝
         break;
       case LOAD_POSTS_FAILURE:
         draft.loadPostsLoading = false;

@@ -51,7 +51,7 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     });
 
     if (hashtags) {
-      const result = await Propmise.all(
+      const result = await Promise.all(
         hashtags.map(
           // 기존에 해쉬태그가 있으면 가져오고 없으면 등록
           (tag) =>
