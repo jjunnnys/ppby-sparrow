@@ -4,7 +4,6 @@ import React from 'react';
 import Head from 'next/head';
 import PropTypes from 'prop-types';
 import 'antd/dist/antd.css';
-import withReduxSaga from 'next-redux-saga';
 
 import wrapper from '../store/configuerStore';
 
@@ -27,4 +26,4 @@ App.prototype = {
   Component: PropTypes.elementType.isRequired,
 };
 
-export default wrapper.withRedux(withReduxSaga(App)); // next로 작업할 땐 redux를 사용하기 위해서 HoC로 감싼다.
+export default wrapper.withRedux(App); // next로 작업할 땐 redux를 사용하기 위해서 HoC로 감싼다.
