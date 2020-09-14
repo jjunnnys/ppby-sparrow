@@ -4,10 +4,13 @@ import Router from 'next/router';
 import { Form, Input, Checkbox, Button } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { END } from 'redux-saga';
 
 import AppLayout from '../components/AppLayout';
 import useInput from '../hooks/useInput';
-import { SIGN_UP_REQUEST } from '../reducers/user';
+import { LOAD_MY_INFO_REQUEST, SIGN_UP_REQUEST } from '../reducers/user';
+import wrapper from '../store/configuerStore';
 
 const ErrorMessage = styled.div`
   color: red;
@@ -148,5 +151,31 @@ const Signup = () => {
     </>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps(
+  async (context) => {
+    console.log('context', context);
+
+    // 브라우저는 개입을 못함 그래서 프론트 서버에서 쿠키를 담아서 보내줘야 cors 해결
+    // 브라우저에서 요청을 보낼 땐 쿠키를 자동으로 보내줬다.
+    // 서버 쪽에서 실행되면 context.req가 존재
+    const cookie = context.req ? context.req.headers.cookie : '';
+    /* 쿠키 공유 문제 해결 법 */
+    axios.defaults.headers.Cookie = ''; // 쿠키 안쓰고 요청 보낼 땐 서버에서 공유하고 있는 쿠키 비우기
+    if (context.req && cookie) {
+      // 내 쿠키가 다른 사람에게 주는 것 방지
+      axios.defaults.headers.Cookie = cookie; // 쿠키를 써서 잠깐 요청을 보낼 때만 쿠키를 넣어 놓음
+    }
+
+    context.store.dispatch({
+      // 매번 로그인 상태 복구해 주기 위해서
+      type: LOAD_MY_INFO_REQUEST,
+    });
+
+    // 지금 상태에선 SUCCESS를 기다리지 못하고 반환된다. -> 보완하기 위해 END 사용 (기다려 줌)
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise(); // (사용법) store에 등록한 sagaTask
+  }
+);
 
 export default Signup;

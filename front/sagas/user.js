@@ -31,6 +31,9 @@ import {
   REMOVE_FOLLOWER_REQUEST,
   REMOVE_FOLLOWER_SUCCESS,
   REMOVE_FOLLOWER_FAILURE,
+  LOAD_USER_SUCCESS,
+  LOAD_USER_FAILURE,
+  LOAD_USER_REQUEST,
 } from '../reducers/user';
 
 const removeFollowerAPI = (data) => {
@@ -124,6 +127,25 @@ function* loadMyInfo(action) {
   } catch (error) {
     yield put({
       type: LOAD_MY_INFO_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
+
+const loadUserAPI = (data) => {
+  return axios.get(`/user/${data}`); // get 하고 delete는 data가 없어서 두번째 자리가 {쿠키전달} 이다.
+};
+// 더 깔끔하게 서버에서 로드될 때부터 정보를 가져오려면 ssr이 필요하다.
+function* loadUser(action) {
+  try {
+    const result = yield call(loadUserAPI, action.data);
+    yield put({
+      type: LOAD_USER_SUCCESS,
+      data: result.data,
+    });
+  } catch (error) {
+    yield put({
+      type: LOAD_USER_FAILURE,
       error: error.response.data,
     });
   }
@@ -244,6 +266,10 @@ function* watchLoadMyInfo() {
   yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
 }
 
+function* watchLoadUser() {
+  yield takeLatest(LOAD_USER_REQUEST, loadUser);
+}
+
 function* watchFollow() {
   yield takeLatest(FOLLOW_REQUEST, follow);
 }
@@ -271,6 +297,7 @@ export default function* userSaga() {
     fork(watchLoadFollowers),
     fork(watchChangeNickname),
     fork(watchLoadMyInfo),
+    fork(watchLoadUser),
     fork(watchFollow),
     fork(watchUnfollow),
     fork(watchLogIn),

@@ -111,7 +111,7 @@ function* unlikePost(action) {
 }
 
 const loadPostsAPI = (lastId) => {
-  return axios.get(`/posts?lasId=${lastId || 0}`);
+  return axios.get(`/posts?lastId=${lastId || 0}`);
 };
 
 function* loadPosts(action) {

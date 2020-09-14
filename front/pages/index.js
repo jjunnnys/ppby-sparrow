@@ -47,9 +47,10 @@ const Home = () => {
         // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
         if (hasMorePosts && !loadPostsLoading) {
           const lastId = mainPosts[mainPosts.length - 1]?.id; // 마지막 게시글의 id
+          console.log(lastId);
           dispatch({
             type: LOAD_POSTS_REQUEST,
-            lastId,
+            data: lastId,
           });
         }
       }
@@ -75,6 +76,7 @@ const Home = () => {
 // Home 보다 먼저 그려진다.
 // 이 부분에서 dispatch를 하면 스토어에 변화가 생긴다.
 // 밑에서 실행된 결과를 HIDERATE로 보내준다.
+// 접속할 때마다 데이터가 바뀌는 경우에 사용
 export const getServerSideProps = wrapper.getServerSideProps(
   async (context) => {
     console.log('context', context);

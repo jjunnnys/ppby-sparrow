@@ -71,6 +71,60 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+/* 특정 user 정보 가져오기 */
+// GET /user/1
+router.get('/:userId', async (req, res, next) => {
+  // 사용자 정보 복구(새로고침을 하면 이 요청이 간다. 단, 로그아웃된 상태여도 요청이 가서 수정)
+
+  try {
+    // 짧은 정보만 불러오면 에러가 생김
+    // const user = await User.findOne({
+    //   where: { id: req.user.id }, -> 로그아웃 상태이면 여기서 에러가 발생함 확실하게 if로 확인
+    // });
+
+    /* 모든 정보를 집어 넣은 유저 (비밀번호는 빼고) */
+    const fullUserWithoutPassword = await User.findOne({
+      where: { id: req.params.userId },
+      // 필요한 필드만 가져오기
+      attributes: {
+        exclude: ['password'],
+      },
+      include: [
+        // User 모델에서 가져오기 (다른 테이블과의 관계를 자동으로 합쳐준다.)
+        {
+          model: Post, // hasMany라서 'model: post' 가 복수형이 되어서 userInfo.Posts가 된다.
+          attributes: ['id'], // 필요 없는 데이터는 안 가져오게 id만 가지고 숫자를 센다.
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: ['id'],
+        },
+        {
+          model: User,
+          as: 'Followers',
+          attributes: ['id'],
+        },
+      ],
+    });
+    if (fullUserWithoutPassword) {
+      // 남의 정보 가져올 땐 신중하게 가져옴
+      const data = fullUserWithoutPassword.toJSON(); // 시퀄라이즈에서 가져온 데이터를 JSON으로 바꿔 줌
+      // id를 빼고 length로만 채운다. (개인정보 침해 예방)
+      data.Posts = data.Posts.length;
+      data.Followings = data.Followings.length;
+      data.Followers = data.Followers.length;
+
+      res.status(200).json(data); // 갈아 끼운 데이터를 넣어준다.
+    } else {
+      res.status(404).json('존재하지 않는 사용자입니다.');
+    }
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
 /* 로그인 */
 // POST /user/login
 router.post('/login', isNotLoggedIn, (req, res, next) => {

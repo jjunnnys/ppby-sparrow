@@ -8,15 +8,17 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const wherre = {}; // 초기 로딩일 때랑 초기 로딩이 아닐 때 불러오는 조건이 다름
+    const where = {}; // 초기 로딩일 때랑 초기 로딩이 아닐 때 불러오는 조건이 다름
 
     // 초기 로딩이 아닐 때
     if (parseInt(req.query.lastId, 10)) {
-      wherre.id = { [Op.lt]: parseInt(req.query.lastId, 10) }; // id가 lastId 보다 작은 -> [Op.lt]
+      where.id = { [Op.lt]: parseInt(req.query.lastId, 10) }; // id가 lastId 보다 작은 -> [Op.lt]
     } // 10개 를 불러왔을 때 그 lastId 보다 작은 게사물을 불러 와야 함
+    // 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
 
     // 여러 개 가져오기
     const posts = await Post.findAll({
+      where,
       /* 중간에 게시글을 추가 삭제할 경우 치명적인 단점이 있다. 그래서 limit, lastId 방식을 사용한다. */
       limit: 10, // 10개만 가져와라
       // offset: 0, -> 1~10 가져와라 (내가 원하는 구간만 잘라서 가져올 수 있다.)

@@ -6,6 +6,9 @@ export const initialSate = {
   loadMyInfoLoading: false, // 유저 정보 가져오기 시도 중
   loadMyInfoDone: false,
   loadMyInfoError: null,
+  loadUserLoading: true,
+  loadUserDone: false,
+  loadUserError: null,
   logInLoading: false, // 로그인 시도 중
   logInDone: false,
   logInError: null,
@@ -40,6 +43,10 @@ export const initialSate = {
 export const LOAD_MY_INFO_REQUEST = 'LOAD_MY_INFO_REQUEST';
 export const LOAD_MY_INFO_SUCCESS = 'LOAD_MY_INFO_SUCCESS';
 export const LOAD_MY_INFO_FAILURE = 'LOAD_MY_INFO_FAILURE';
+
+export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
+export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
@@ -160,6 +167,21 @@ const reducer = (state = initialSate, action) => {
       case LOAD_MY_INFO_FAILURE:
         draft.loadMyInfoLoading = false;
         draft.loadMyInfoError = action.error;
+        break;
+      /* 특정 유저 가져오기 */
+      case LOAD_USER_REQUEST:
+        draft.loadUserLoading = true;
+        draft.loadUserDone = false;
+        draft.loadUserError = null;
+        break;
+      case LOAD_USER_SUCCESS:
+        draft.otherUserInfo = action.data; // 실제 로그인이 됐으면 action.data에 유저 정보가 들어 있음
+        draft.loadUserLoading = false;
+        draft.loadUserDone = true;
+        break;
+      case LOAD_USER_FAILURE:
+        draft.loadUserLoading = false;
+        draft.loadUserError = action.error;
         break;
       /* 팔로우 */
       case FOLLOW_REQUEST:
