@@ -2,6 +2,7 @@ import prodece from 'immer';
 
 export const initialSate = {
   mainPosts: [],
+  singlePost: null, // 게시글 하나만 불러올 때
   imagePaths: [],
   hasMorePosts: true, // 처음 게시물이 0개일 때는 포스트를 가져오는 시도를 해야함
   likePostLoading: false,
@@ -13,6 +14,9 @@ export const initialSate = {
   loadPostsLoading: false,
   loadPostsDone: false,
   loadPostsError: null,
+  loadPostLoading: false,
+  loadPostDone: false,
+  loadPostError: null,
   addPostLoading: false,
   addPostDone: false,
   addPostError: null,
@@ -53,6 +57,10 @@ export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
 export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
+
+export const LOAD_POST_REQUEST = 'LOAD_POST_REQUEST';
+export const LOAD_POST_SUCCESS = 'LOAD_POST_SUCCESS';
+export const LOAD_POST_FAILURE = 'LOAD_POST_FAILURE';
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -168,7 +176,7 @@ const reducer = (state = initialSate, action) => {
         draft.unlikePostLoading = false;
         draft.unlikePostError = action.error;
         break;
-      /* 로딩 포스트 추가 */
+      /* 모든 포스트 불러오기 */
       case LOAD_POSTS_REQUEST:
         draft.loadPostsLoading = true;
         draft.loadPostsDone = false;
@@ -184,6 +192,21 @@ const reducer = (state = initialSate, action) => {
       case LOAD_POSTS_FAILURE:
         draft.loadPostsLoading = false;
         draft.loadPostsError = action.error;
+        break;
+      /* 특정 포스트 불러오기 */
+      case LOAD_POST_REQUEST:
+        draft.loadPostLoading = true;
+        draft.loadPostDone = false;
+        draft.loadPostError = null;
+        break;
+      case LOAD_POST_SUCCESS:
+        draft.loadPostLoading = false;
+        draft.loadPostDone = true;
+        draft.singlePost = action.data;
+        break;
+      case LOAD_POST_FAILURE:
+        draft.loadPostLoading = false;
+        draft.loadPostError = action.error;
         break;
       /* 포스트 추가 */
       case ADD_POST_REQUEST:

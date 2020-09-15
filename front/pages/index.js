@@ -47,7 +47,6 @@ const Home = () => {
         // 기존에 로딩하고 있을 떈 밑에 부분이 실행 안된다.
         if (hasMorePosts && !loadPostsLoading) {
           const lastId = mainPosts[mainPosts.length - 1]?.id; // 마지막 게시글의 id
-          console.log(lastId);
           dispatch({
             type: LOAD_POSTS_REQUEST,
             data: lastId,

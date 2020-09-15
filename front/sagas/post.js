@@ -25,6 +25,9 @@ import {
   RETWEET_REQUEST,
   RETWEET_SUCCESS,
   RETWEET_FAILURE,
+  LOAD_POST_SUCCESS,
+  LOAD_POST_FAILURE,
+  LOAD_POST_REQUEST,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
@@ -33,7 +36,7 @@ import {
 
 const retweetAPI = (data) => {
   // data 는 postId
-  return axios.post(`/post/${data}/retweet`, data); // formData를 그대로 보내줘야 함 json으로 만들면 안된다.
+  return axios.post(`/post/${data}/retweet`);
 };
 
 function* retweet(action) {
@@ -124,6 +127,25 @@ function* loadPosts(action) {
   } catch (error) {
     yield put({
       type: LOAD_POSTS_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
+
+const loadPostAPI = (data) => {
+  return axios.get(`/post/${data}`);
+};
+
+function* loadPost(action) {
+  try {
+    const result = yield call(loadPostAPI, action.data);
+    yield put({
+      type: LOAD_POST_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    yield put({
+      type: LOAD_POST_FAILURE,
       error: error.response.data,
     });
   }
@@ -220,6 +242,10 @@ function* watchLoadPosts() {
   /* 메모리 절약을 위한 -> react-virtualized 사용 */
 }
 
+function* watchLoadPost() {
+  yield takeLatest(LOAD_POST_REQUEST, loadPost);
+}
+
 function* watchAddPost() {
   yield takeLatest(ADD_POST_REQUEST, addPost);
 }
@@ -239,6 +265,7 @@ export default function* postSaga() {
     fork(watchLikePost),
     fork(watchUnlikePost),
     fork(watchLoadPosts),
+    fork(watchLoadPost),
     fork(watchAddPost),
     fork(watchRemovePost),
     fork(watchAddComment),

@@ -121,13 +121,18 @@ router.post(
   isLoggedIn,
   upload.array('image'), // 이미지를 여러장 올릴 수 있게 하기 위해 array, 한장이면 single, 파일이 아닌 그냥 JSON이면 none(), 파일 input이 여러 개면 fields
   (req, res, next) => {
-    console.log(req.files); // 업로드된 이미지 정보가 들어 있음
-    res.status(200).json(req.files.map((v) => v.filename));
+    try {
+      console.log(req.files); // 업로드된 이미지 정보가 들어 있음
+      res.status(200).json(req.files.map((v) => v.filename));
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
   }
 );
 
 /* 리트윗 */
-// POST /1/comment
+// POST /post/1/retweet
 router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
   try {
     // 악성 사용자를 대비해서 확실하게 게시글이 있는지 확인한다.
@@ -195,10 +200,15 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
           attributes: ['id', 'nickname'],
         },
         {
+          model: User, // 좋아요 누른 사람
+          as: 'Likers',
+          attributes: ['id'],
+        },
+        {
           model: Image,
         },
         {
-          modle: Comment,
+          model: Comment,
           include: [
             {
               model: User,
@@ -208,7 +218,46 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
         },
       ],
     });
-    res.status(201).json(fullComment); // 잘 생성 되고 프론트에 돌려 줌
+    res.status(201).json(retweetWithPrevPost); // 잘 생성 되고 프론트에 돌려 줌
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+/* 게시글 하나 가져오기 */
+// GET /post/1
+router.get('/:postId', async (req, res, next) => {
+  // 로그인 없이 접근 가능
+  try {
+    const post = await Post.findOne({
+      where: { id: req.params.postId },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'nickname'],
+        },
+        {
+          model: Image,
+        },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'nickname'],
+              order: [['createdAt', 'DESC']],
+            },
+          ],
+        },
+        {
+          model: User, // 좋아요 누른 사람
+          as: 'Likers',
+          attributes: ['id'],
+        },
+      ],
+    });
+    res.status(200).json(post);
   } catch (error) {
     console.error(error);
     next(error);
@@ -250,6 +299,7 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
   }
 });
 
+/* 좋아요 */
 // PATCH /post/1/like
 router.patch('/:postId/like', isLoggedIn, async (req, res, next) => {
   // !! 항상 데이터먼저 검사하기
@@ -266,6 +316,7 @@ router.patch('/:postId/like', isLoggedIn, async (req, res, next) => {
   }
 });
 
+/* 좋아요 취소 */
 // DELETE /post/1/like
 router.delete('/:postId/like', isLoggedIn, async (req, res, next) => {
   try {
@@ -281,6 +332,7 @@ router.delete('/:postId/like', isLoggedIn, async (req, res, next) => {
   }
 });
 
+/* 게시글 삭제 */
 // DELETE /post/10
 router.delete('/:postId', isLoggedIn, async (req, res, next) => {
   try {

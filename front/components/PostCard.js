@@ -75,6 +75,7 @@ const PostCard = ({ post }) => {
     }
     return dispatch({
       type: RETWEET_REQUEST,
+      data: post.id,
     });
   }, [id]);
 
