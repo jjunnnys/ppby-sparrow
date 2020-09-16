@@ -28,6 +28,12 @@ import {
   LOAD_POST_SUCCESS,
   LOAD_POST_FAILURE,
   LOAD_POST_REQUEST,
+  LOAD_USER_POSTS_FAILURE,
+  LOAD_USER_POSTS_SUCCESS,
+  LOAD_HASHTAG_POSTS_SUCCESS,
+  LOAD_HASHTAG_POSTS_FAILURE,
+  LOAD_USER_POSTS_REQUEST,
+  LOAD_HASHTAG_POSTS_REQUEST,
 } from '../reducers/post';
 import {
   ADD_POST_TO_USER_INFO,
@@ -132,6 +138,50 @@ function* loadPosts(action) {
   }
 }
 
+const loadUserPostsAPI = (data, lastId) => {
+  return axios.get(`/user/${data}/posts?lastId=${lastId || 0}`);
+};
+
+function* loadUserPosts(action) {
+  try {
+    const result = yield call(loadUserPostsAPI, action.data, action.lastId); // 인자를 두개 넘길 수 있음
+    yield put({
+      type: LOAD_USER_POSTS_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    console.error(error);
+    yield put({
+      type: LOAD_USER_POSTS_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
+
+const loadHashtagPostsAPI = (data, lastId) => {
+  // get 요청 시 한글 들어가면 에러 뜸 -> encodeURIComponent 로 감싸 줌
+  return axios.get(
+    `/hashtag/${encodeURIComponent(data)}?lastId=${lastId || 0}`
+  );
+};
+
+function* loadHashtagPosts(action) {
+  try {
+    const result = yield call(loadHashtagPostsAPI, action.data, action.lastId); // 인자를 두개 넘길 수 있음
+    console.log(result);
+    yield put({
+      type: LOAD_HASHTAG_POSTS_SUCCESS,
+      data: result.data, // 게시글들의 배열이 들어 있음
+    });
+  } catch (error) {
+    console.error(error);
+    yield put({
+      type: LOAD_HASHTAG_POSTS_FAILURE,
+      error: error.response.data,
+    });
+  }
+}
+
 const loadPostAPI = (data) => {
   return axios.get(`/post/${data}`);
 };
@@ -144,6 +194,7 @@ function* loadPost(action) {
       data: result.data, // 게시글들의 배열이 들어 있음
     });
   } catch (error) {
+    console.error(error);
     yield put({
       type: LOAD_POST_FAILURE,
       error: error.response.data,
@@ -242,6 +293,14 @@ function* watchLoadPosts() {
   /* 메모리 절약을 위한 -> react-virtualized 사용 */
 }
 
+function* watchLoadUserPosts() {
+  yield throttle(5000, LOAD_USER_POSTS_REQUEST, loadUserPosts);
+}
+
+function* watchLoadHashtagPosts() {
+  yield throttle(5000, LOAD_HASHTAG_POSTS_REQUEST, loadHashtagPosts);
+}
+
 function* watchLoadPost() {
   yield takeLatest(LOAD_POST_REQUEST, loadPost);
 }
@@ -265,6 +324,8 @@ export default function* postSaga() {
     fork(watchLikePost),
     fork(watchUnlikePost),
     fork(watchLoadPosts),
+    fork(watchLoadUserPosts),
+    fork(watchLoadHashtagPosts),
     fork(watchLoadPost),
     fork(watchAddPost),
     fork(watchRemovePost),

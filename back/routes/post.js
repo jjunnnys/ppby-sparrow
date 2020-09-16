@@ -50,20 +50,24 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
       UserId: req.user.id, // deserialize를 통해 req.user가 생성
     });
 
+    // 해시태그 등록
     if (hashtags) {
+      console.log('🔥', hashtags);
       const result = await Promise.all(
         hashtags.map(
-          // 기존에 해쉬태그가 있으면 가져오고 없으면 등록
+          // 기존에 해쉬태그가 있으면 가져오고 없으면 등록 -> findOrCreate
           (tag) =>
             Hashtag.findOrCreate({
-              whrere: { name: tag.slice(1).toLowerCase() },
+              where: { name: tag.slice(1).toLowerCase() },
             }) // slice(1)은 해쉬태그(#)를 때버린다(대문자로 검색하나 소문자로 검색하나 검색이 되기 위해서 DB에 소문자로 통일해서 저장)
         )
       );
-      // result 값이 [#노드,true], [#리액트,true] -> 뒤에는 생성됐는지 가져 왔는지 알려 줌
+
+      // result 값이 [노드,true], [리액트,true] -> 뒤에는 생성됐는지 가져 왔는지 알려 줌
       await post.addHashtags(result.map((v) => v[0]));
     }
 
+    // 이미지 등록
     if (req.body.image) {
       if (Array.isArray(req.body.image)) {
         // 이미지를 여러 개 올리면 image: [ppby.png, ppby1.png] 배열형태로 들어 감
