@@ -141,6 +141,50 @@ router.get('/:userId/posts', async (req, res, next) => {
   }
 });
 
+/* 
+  404는 존재하지 않을 때 나온다. (밑에 followers,followings에서 404가 없음에도 뜨는 이유)
+  - 라우터(미들웨어) 위에서부터 아래로 왼쪽에서 오른쪽으로 실행
+  - 와일드카드(params) 에서 다 걸린다
+  - 지금은 :userId에서 다 걸려서 이 부분이 followers나 followings로 착각해서 실행 됨
+  - 왠만하면 다 밑으로 내린다.
+*/
+
+/* 내 팔로워 불러오기 */
+// GET /user/followers
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('없는 사람입니다.');
+    }
+    const followers = await user.getFollowers({
+      limit: parseInt(req.query.limit, 10), // 한번에 3명씩 불러오기, limit을 올려주면 그 limit만큼 더 가져온다.
+    });
+    res.status(200).json(followers);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+/* 내 팔로잉 불러오기 */
+// GET /user/followings
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
+    if (!user) {
+      res.status(403).send('없는 사람입니다.');
+    }
+    const followings = await user.getFollowings({
+      limit: parseInt(req.query.limit, 10),
+    }); // 복수로 쓰면 무조건 된다. (하지만 단수가 말이 맞을 경우 테스트해 보기)
+    res.status(200).json(followings);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
 /* 특정 user 정보 가져오기 */
 // GET /user/1
 router.get('/:userId', async (req, res, next) => {
@@ -359,36 +403,6 @@ router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
     }
     await user.removeFollowing(req.user.id); //
     res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-});
-
-// GET /user/followers
-router.get('/followers', isLoggedIn, async (req, res, next) => {
-  try {
-    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
-    if (!user) {
-      res.status(403).send('없는 사람입니다.');
-    }
-    const followers = await user.getFollowers();
-    res.status(200).json(followers);
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-});
-
-// GET /user/followings
-router.get('/followings', isLoggedIn, async (req, res, next) => {
-  try {
-    const user = await User.findOne({ where: { id: req.user.id } }); // userId가 들어 있는지 확인
-    if (!user) {
-      res.status(403).send('없는 사람입니다.');
-    }
-    const followings = await user.getFollowings(); // 복수로 쓰면 무조건 된다. (하지만 단수가 말이 맞을 경우 테스트해 보기)
-    res.status(200).json(followings);
   } catch (error) {
     console.error(error);
     next(error);

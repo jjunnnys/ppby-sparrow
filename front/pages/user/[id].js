@@ -98,6 +98,8 @@ const User = () => {
   );
 };
 
+// 다이나믹 라우팅일 경우 getStaticProps쓰려면 getStaticPath를 같이 쓴다. -> 그래야지 렌더링이 된다.
+// 미리 렌더링을 통해 html로 만들기 떄문에 제한된 컨텐츠일 경우 사용 (개인 블로그 글 등)
 export const getServerSideProps = wrapper.getServerSideProps(
   async (context) => {
     const cookie = context.req ? context.req.headers.cookie : '';
