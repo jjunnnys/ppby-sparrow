@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Avatar, Card } from 'antd';
 import { END } from 'redux-saga';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -10,7 +9,7 @@ import { LOAD_HASHTAG_POSTS_REQUEST } from '../../reducers/post';
 import { LOAD_MY_INFO_REQUEST } from '../../reducers/user';
 import PostCard from '../../components/PostCard';
 import AppLayout from '../../components/AppLayout';
-import wrapper from '../../store/configuerStore';
+import wrapper from '../../store/configureStore';
 
 const Hashtag = () => {
   const dispatch = useDispatch();

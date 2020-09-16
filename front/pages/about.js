@@ -5,7 +5,7 @@ import { END } from 'redux-saga';
 
 import AppLayout from '../components/AppLayout';
 import { Avatar, Card } from '../node_modules/antd/lib/index';
-import wrapper from '../store/configuerStore';
+import wrapper from '../store/configureStore';
 import { LOAD_USER_REQUEST } from '../reducers/user';
 
 const About = () => {

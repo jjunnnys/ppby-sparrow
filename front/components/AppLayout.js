@@ -45,11 +45,6 @@ const AppLayout = ({ children }) => {
             onSearch={onSearch}
           />
         </Menu.Item>
-        <Menu.Item>
-          <Link href="/signup">
-            <a>회원가입</a>
-          </Link>
-        </Menu.Item>
       </Menu>
       <Row
         gutter={8} // 컬럼 사이에 간격 주기(두 컬럼 사이를 8px로 띄움)

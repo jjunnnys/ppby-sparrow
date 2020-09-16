@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import Head from 'next/Head';
+import Head from 'next/head';
 import Router from 'next/router';
 import { Form, Input, Checkbox, Button } from 'antd';
 import styled from 'styled-components';
@@ -10,7 +10,7 @@ import { END } from 'redux-saga';
 import AppLayout from '../components/AppLayout';
 import useInput from '../hooks/useInput';
 import { LOAD_MY_INFO_REQUEST, SIGN_UP_REQUEST } from '../reducers/user';
-import wrapper from '../store/configuerStore';
+import wrapper from '../store/configureStore';
 
 const ErrorMessage = styled.div`
   color: red;

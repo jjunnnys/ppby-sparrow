@@ -10,7 +10,7 @@ import AppLayout from '../components/AppLayout';
 import NicknameEditFrom from '../components/NicknameEditFrom';
 import FollowList from '../components/FollowList';
 import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
-import wrapper from '../store/configuerStore';
+import wrapper from '../store/configureStore';
 
 const fetcher = (url) =>
   axios.get(url, { withCredentials: true }).then((result) => result.data);
