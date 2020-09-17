@@ -5,7 +5,8 @@
   "author": "ppby",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon app"
+    "dev": "nodemon app",
+    "start": "node app"
   },
   "dependencies": {
     "bcrypt": "5.0.0",
