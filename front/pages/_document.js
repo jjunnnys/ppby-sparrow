@@ -5,9 +5,7 @@ import { ServerStyleSheet } from 'styled-components';
 
 // 제일 위의 html, body를 수정할 수 있다.
 export default class MyDocument extends Document {
-  // getInitialProps -> _document 나 _app 에서만 쓰는 특수한 메서드 (조만간 사라질 수 있음)
   static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
     // styled-components 의 ssr 방식
     const sheet = new ServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
@@ -17,13 +15,13 @@ export default class MyDocument extends Document {
       ctx.renderPage = () =>
         originalRenderPage({
           enhanceApp: (App) => (props) =>
-            // eslint-disable-next-line react/jsx-props-no-spreading
             sheet.collectStyles(<App {...props} />),
         });
-      const initlalProps = await Document.getInitialProps(ctx);
 
+      // getInitialProps -> _document 나 _app 에서만 쓰는 특수한 메서드 (조만간 사라질 수 있음)
+      const initialProps = await Document.getInitialProps(ctx);
       return {
-        ...initlalProps,
+        ...initialProps,
         styles: (
           <>
             {initialProps.styles}
@@ -36,10 +34,6 @@ export default class MyDocument extends Document {
     } finally {
       sheet.seal();
     }
-
-    return {
-      ...initialProps,
-    };
   }
 
   render() {
@@ -48,8 +42,7 @@ export default class MyDocument extends Document {
         <Head />
         <body>
           <Main />
-          {/* IE 지원을 위해 polyfill.io 이용 */}
-          <script src="https://polyfill.io/v3/polyfill.min.js?features=default%2Ces2015%2Ces2016%2Ces2017%2Ces2018%2Ces2019" />
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6,es7,es8,es9,NodeList.prototype.forEach&flags=gated" />
           <NextScript />
         </body>
       </Html>

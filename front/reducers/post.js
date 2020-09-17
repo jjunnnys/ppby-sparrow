@@ -1,4 +1,4 @@
-import prodece from 'immer';
+import produce from '../util/produce';
 
 export const initialSate = {
   mainPosts: [],
@@ -104,7 +104,7 @@ export const addComment = (data) => ({
 
 const reducer = (state = initialSate, action) => {
   // state는 건들면 안 됨, 기존에 state를 draft로 대체
-  return prodece(state, (draft) => {
+  return produce(state, (draft) => {
     switch (action.type) {
       /* 리트윗 */
       case RETWEET_REQUEST:

@@ -1,4 +1,11 @@
 const Sequelize = require('sequelize');
+
+const comment = require('./comment');
+const hashtag = require('./hashtag');
+const image = require('./image');
+const post = require('./post');
+const user = require('./user');
+
 const env = process.env.NODE_ENV || 'development'; // 기본 값을 development
 const config = require('../config/config')[env]; // json 파일 가져온 것에 대해 env에 따라 파싱
 const db = {};
@@ -19,11 +26,15 @@ const sequelize = new Sequelize(
 );
 
 /* 테이블 생성 - 모델은 단수로 작성, (테이블을 모델이라고 부름) */
-db.Comment = require('./comment')(sequelize, Sequelize);
-db.Hashtag = require('./hashtag')(sequelize, Sequelize);
-db.Image = require('./image')(sequelize, Sequelize);
-db.Post = require('./post')(sequelize, Sequelize);
-db.User = require('./user')(sequelize, Sequelize);
+db.Comment = comment;
+db.Hashtag = hashtag;
+db.Image = image;
+db.Post = post;
+db.User = user;
+
+Object.keys(db).forEach((modelName) => {
+  db[modelName].init(sequelize);
+});
 
 // 반복문 돌면서 모델에 있는 associate 부분을 실행해 줌
 Object.keys(db).forEach((modelName) => {
