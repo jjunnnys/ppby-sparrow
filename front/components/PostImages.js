@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { PlusOutlined } from '@ant-design/icons';
 import ImagesZoom from './ImagesZoom';
+import { backUrl } from '../config';
 
 // 이미지가 한개 이상있을 때 PostImages 컴포넌트가 작성된다.
 const PostImages = ({ images }) => {
@@ -24,7 +25,7 @@ const PostImages = ({ images }) => {
         */}
         <img
           role="presentation"
-          src={`http://localhost:3065/${images[0].src}`}
+          src={`${backUrl}/${images[0].src}`}
           alt={images[0].src}
           onClick={onZoom}
         />
@@ -41,7 +42,7 @@ const PostImages = ({ images }) => {
             display: 'inline-block',
           }}
           role="presentation"
-          src={`http://localhost:3065/${images[0].src}`}
+          src={`${backUrl}/${images[0].src}`}
           alt={images[0].src}
           onClick={onZoom}
         />
@@ -51,7 +52,7 @@ const PostImages = ({ images }) => {
             display: 'inline-block',
           }}
           role="presentation"
-          src={`http://localhost:3065/${images[1].src}`}
+          src={`${backUrl}/${images[1].src}`}
           alt={images[1].src}
           onClick={onZoom}
         />
@@ -68,7 +69,7 @@ const PostImages = ({ images }) => {
           display: 'inline-block',
         }}
         role="presentation"
-        src={`http://localhost:3065/${images[0].src}`}
+        src={`${backUrl}/${images[0].src}`}
         alt={images[0].src}
         onClick={onZoom}
       />

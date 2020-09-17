@@ -7,6 +7,7 @@ import {
   ADD_POST_REQUEST,
 } from '../reducers/post';
 import useInput from '../hooks/useInput';
+import { backUrl } from '../config';
 
 const PostForm = () => {
   const [text, onChangeText, setText] = useInput('');
@@ -104,11 +105,7 @@ const PostForm = () => {
       <div>
         {imagePaths.map((v, index) => (
           <div key={v} style={{ display: 'inline-block' }}>
-            <img
-              src={`http://localhost:3065/${v}`}
-              style={{ width: '200px' }}
-              alt={v}
-            />
+            <img src={`${backUrl}/${v}`} style={{ width: '200px' }} alt={v} />
             <div>
               <Button onClick={onRemoveImage(index)}>제거</Button>
             </div>
