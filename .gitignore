@@ -1,4 +1,5 @@
-ppby-sparrow.pem
+
 node_modules
 .env
 .next
+ppby-sparrow-aws.pem
