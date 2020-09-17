@@ -6,6 +6,8 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const path = require('path');
+const hpp = require('hpp');
+const helmet = require('helmet');
 
 const postRouter = require('./routes/post');
 const postsRouter = require('./routes/posts');
@@ -47,7 +49,17 @@ passportConfig();
 
 app.use('/', express.static(path.join(__dirname, 'uploads'))); // back 폴더 안에 uploads를 join으로 합친다. (운영체제마다 path의 표기가 달라서 path.join으로 설정)
 // '/' 를 붙힘으로써 프론트에서 back의 구조를 모르기 때문에 보안의 이점이 있다.
-app.use(morgan('dev'));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined')); // 좀 더 로그가 자세함
+
+  // 보안에 도움되는 패키지
+  app.use(hpp());
+  app.use(helmet());
+} else {
+  app.use(morgan('dev'));
+}
+
 // 상위에 적어야한다. 미들웨어 특성 상 요청한 데이터를 위에서 아래로 시작이 된다.
 app.use(
   // 실무에서는 요청을 보내는 도메인을 적어 줌
@@ -95,6 +107,6 @@ app.use('/posts', postsRouter);
 app.use('/user', userRouter);
 app.use('/hashtag', hashtagRouter);
 
-app.listen(3065, () => {
+app.listen(80, () => {
   console.log('서버 실행 중');
 });
